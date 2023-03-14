@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.company.repository.CompanyRepository;
 import snust.sbsp.crew.domain.Crew;
+import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.repository.CrewRepository;
+import snust.sbsp.sign.dto.req.SigninReqDto;
 import snust.sbsp.sign.dto.req.SignupReqDto;
 
 import javax.crypto.Cipher;
@@ -52,14 +54,14 @@ public class SignService {
       .email(signupReqDto.getEmail())
       .password(encryptPassword(signupReqDto))
       .name(signupReqDto.getName())
-      .number(signupReqDto.getNumber())
-      .classification(signupReqDto.getClassification())
-      .role(signupReqDto.getClassification().equals("관리자") ? Role.COMPANY_ADMIN : Role.USER)
+      .phone(signupReqDto.getNumber())
+      .businessType(signupReqDto.getBusinessType())
+      .role(signupReqDto.getBusinessType().equals("관리자") ? Role.COMPANY_ADMIN : Role.PENDING)
       .build();
     return crewRepository.save(crew).getId();
   }
 
-  public Optional<Crew> validateCrew(SignInReqDto signInReqDto) {
+  public Optional<Crew> validateCrew(SigninReqDto signInReqDto) {
     Optional<Crew> member = crewRepository.findByEmail(signInReqDto.getEmail());
     if (member.isPresent()) {
       String inComingCode = signInReqDto.getEmail() + signInReqDto.getPassword();
