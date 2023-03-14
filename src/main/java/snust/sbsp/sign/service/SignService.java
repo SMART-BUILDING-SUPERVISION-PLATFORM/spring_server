@@ -7,6 +7,7 @@ import snust.sbsp.company.domain.Company;
 import snust.sbsp.company.repository.CompanyRepository;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.repository.CrewRepository;
+import snust.sbsp.sign.dto.req.SignupReqDto;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -37,7 +38,7 @@ public class SignService {
     this.companyRepository = companyRepository;
   }
 
-  public Long join(SignUpReqDto signupReqDto) {
+  public Long join(SignupReqDto signupReqDto) {
     Long companyId = signupReqDto.getCompanyId();
     Optional<Company> company = companyRepository.findById(companyId);
     if (company.isEmpty()) {
@@ -77,12 +78,12 @@ public class SignService {
     return crewRepository.findByEmail(email);
   }
 
-  private Optional<Company> getCompany(SignUpReqDto signUpReqDto) {
+  private Optional<Company> getCompany(SignupReqDto signUpReqDto) {
     Long companyId = signUpReqDto.getCompanyId();
     return companyRepository.findById(companyId);
   }
 
-  private boolean isPossibleToJoin(SignUpReqDto signUpReqDto) {
+  private boolean isPossibleToJoin(SignupReqDto signUpReqDto) {
     String classification = signUpReqDto.getClassification();
     boolean isAdminPresent = isAdminPresent(signUpReqDto);
     if (classification.equals("관리자")) {
@@ -92,7 +93,7 @@ public class SignService {
     }
   }
 
-  private boolean isAdminPresent(SignUpReqDto signUpReqDto) {
+  private boolean isAdminPresent(SignupReqDto signUpReqDto) {
     Long companyId = signUpReqDto.getCompanyId();
     Optional<Company> company = companyRepository.findById(companyId);
     if (company.isPresent()) {
@@ -105,7 +106,7 @@ public class SignService {
     return false;
   }
 
-  private String encryptPassword(SignUpReqDto signUpReqDto) {
+  private String encryptPassword(SignupReqDto signUpReqDto) {
     String encryptedCode = "";
     String target = signUpReqDto.getEmail() + signUpReqDto.getPassword();
     try {
