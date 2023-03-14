@@ -1,6 +1,7 @@
 package snust.sbsp.crew.domain;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import snust.sbsp.company.domain.Company;
@@ -33,4 +34,15 @@ public class Crew {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company company;
+
+    @Builder
+    public Crew(String email, String password, String name, String phone, String businessType, Role role, Company company) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.phone = phone;
+        this.businessType = businessType;
+        this.role = role;
+        this.company = company;
+    }
 }
