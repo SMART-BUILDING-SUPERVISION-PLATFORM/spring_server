@@ -13,14 +13,13 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SwaggerConfig {
   @Bean
   public Docket api() {
-    Docket docket = new Docket(DocumentationType.OAS_30)
+    return new Docket(DocumentationType.OAS_30)
       .useDefaultResponseMessages(false)
       .select()
       .apis(RequestHandlerSelectors.basePackage("snust.sbsp"))
       .paths(PathSelectors.any())
       .build()
       .apiInfo(apiInfo());
-    return docket;
   }
   private ApiInfo apiInfo() {
     return new ApiInfoBuilder()
