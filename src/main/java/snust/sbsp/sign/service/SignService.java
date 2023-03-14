@@ -15,6 +15,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.transaction.Transactional;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -86,9 +87,9 @@ public class SignService {
   }
 
   private boolean isPossibleToJoin(SignupReqDto signUpReqDto) {
-    String classification = signUpReqDto.getClassification();
+    String businessType = signUpReqDto.getBusinessType();
     boolean isAdminPresent = isAdminPresent(signUpReqDto);
-    if (classification.equals("관리자")) {
+    if (businessType.equals("관리자")) {
       return !isAdminPresent;
     } else {
       return isAdminPresent;
@@ -99,7 +100,7 @@ public class SignService {
     Long companyId = signUpReqDto.getCompanyId();
     Optional<Company> company = companyRepository.findById(companyId);
     if (company.isPresent()) {
-      List<Crew> companyCrewList = company.get().getCompanyCrews();
+      List<Crew> companyCrewList = company.get().getCrewList();
       Optional<Crew> companyAdmin = companyCrewList.stream().filter(crew ->
         crew.getRole().equals(Role.COMPANY_ADMIN)
       ).findAny();
@@ -116,7 +117,7 @@ public class SignService {
       SecretKeySpec keySpec = new SecretKeySpec(aesKey.getBytes(), "AES");
       IvParameterSpec ivParameterSpec = new IvParameterSpec(aesIv.getBytes());
       cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivParameterSpec);
-      byte[] encrypted1 = cipher.doFinal(target.getBytes("UTF-8"));
+      byte[] encrypted1 = cipher.doFinal(target.getBytes(StandardCharsets.UTF_8));
       encryptedCode = Base64.getEncoder().encodeToString(encrypted1);
     } catch (Exception e) {
       e.printStackTrace();
