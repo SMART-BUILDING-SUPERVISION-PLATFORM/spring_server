@@ -1,12 +1,11 @@
 package snust.sbsp.company.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.istack.NotNull;
 import lombok.*;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.project.domain.Project;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -15,19 +14,15 @@ import java.util.List;
 @AllArgsConstructor
 @Entity(name = "company")
 public class Company {
-  @JsonIgnore
   @OneToMany(mappedBy = "company")
-  List<Crew> crewList;
-  @JsonIgnore
+  List<Crew> crewList = new ArrayList<>();
   @OneToMany(mappedBy = "company")
-  List<Project> projectList;
+  List<Project> projectList = new ArrayList<>();
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  @NotNull
   @Column(name = "name")
   private String name;
-  @NotNull
   @Column(name = "address")
   private String address;
 }
