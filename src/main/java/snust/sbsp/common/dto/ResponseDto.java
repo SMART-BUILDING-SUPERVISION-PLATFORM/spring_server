@@ -1,29 +1,54 @@
 package snust.sbsp.common.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 
 @Getter
 @AllArgsConstructor
 public class ResponseDto<T> {
-  private boolean ok;
-  private T body;
-  private Error error;
 
-  public static <T> ResponseDto<T> success(T body) {
-    return new ResponseDto<>(true, body, null);
+  public static <T> ResponseEntity<T> ok(int status) {
+    return new ResponseEntity<>(HttpStatus.valueOf(status));
   }
 
-  public static <T> ResponseDto<T> fail(int status, HttpStatus httpStatus, String message) {
-    return new ResponseDto<>(false, null, new Error(status, httpStatus, message));
+  public static <T> ResponseEntity<T> ok(int status, T data) {
+    return ResponseEntity
+      .status(HttpStatus.valueOf(status))
+      .body(data);
+  }
+
+  public static <T> ResponseEntity<T> ok(int status, T data, ResponseCookie responseCookie) {
+    return ResponseEntity
+      .status(HttpStatus.valueOf(status))
+      .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+      .body(data);
+  }
+
+  public static ResponseEntity<ErrorResponse> fail(int errStatus, String errorMessage) {
+    return ResponseEntity
+      .status(HttpStatus.valueOf(errStatus))
+      .body(ErrorResponse.builder()
+        .status(errStatus)
+        .errorMessage(errorMessage)
+        .build());
   }
 
   @Getter
-  @AllArgsConstructor
-  static class Error {
-    private final int status;
-    private final HttpStatus httpStatus;
-    private final String message;
+  @NoArgsConstructor
+  private static class ErrorResponse {
+    int status;
+    String errorMessage;
+
+    @Builder
+    public ErrorResponse(int status, String errorMessage) {
+      this.status = status;
+      this.errorMessage = errorMessage;
+    }
   }
 }
