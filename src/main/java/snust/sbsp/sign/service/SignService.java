@@ -89,10 +89,12 @@ public class SignService {
   private boolean isPossibleToJoin(SignupReqDto signUpReqDto) {
     String businessType = signUpReqDto.getBusinessType();
     boolean isAdminPresent = isAdminPresent(signUpReqDto);
-    if (businessType.equals("관리자")) {
-      return !isAdminPresent;
+    if (businessType.equals("관리자") && isAdminPresent) {
+      return false;
+    } else if (businessType.equals("관리자")) {
+      return true;
     } else {
-      return isAdminPresent;
+      return true;
     }
   }
 
