@@ -2,10 +2,7 @@ package snust.sbsp.project.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.istack.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.project.domain.type.CtrType;
 import snust.sbsp.project.domain.type.DetailCtrType;
@@ -15,7 +12,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Entity(name = "project")
 public class Project {
   @JsonIgnore
@@ -54,27 +53,4 @@ public class Project {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "company_id")
   private Company company;
-
-  @Builder
-  public Project(
-    String name,
-    LocalDate startDate,
-    LocalDate endDate,
-    Integer processRate,
-    CtrType ctrType,
-    DetailCtrType detailCtrType,
-    String thumbnailUrl,
-    String floorUrl,
-    Company company
-  ) {
-    this.name = name;
-    this.startDate = startDate;
-    this.endDate = endDate;
-    this.processRate = processRate;
-    this.ctrType = ctrType;
-    this.detailCtrType = detailCtrType;
-    this.thumbnailUrl = thumbnailUrl;
-    this.floorUrl = floorUrl;
-    this.company = company;
-  }
 }

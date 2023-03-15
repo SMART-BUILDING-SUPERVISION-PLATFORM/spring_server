@@ -1,17 +1,16 @@
 package snust.sbsp.project.domain;
 
 import com.sun.istack.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.project.domain.type.Role;
 
 import javax.persistence.*;
 
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Entity(name = "participant")
 public class Participant {
   @Id
@@ -29,11 +28,4 @@ public class Participant {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "project_id")
   private Project project;
-
-  @Builder
-  public Participant(Role role, Crew crew, Project project) {
-    this.role = role;
-    this.crew = crew;
-    this.project = project;
-  }
 }
