@@ -15,24 +15,36 @@ import java.util.List;
 @AllArgsConstructor
 @Entity(name = "crew")
 public class Crew {
+
   @OneToMany(mappedBy = "crew")
   List<Participant> participantList = new ArrayList<>();
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
   @Column(name = "email")
   private String email;
+
   @Column(name = "password")
   private String password;
+
   @Column(name = "name")
   private String name;
+
   @Column(name = "phone")
   private String phone;
+
   @Column(name = "business_type")
   private String businessType;
+
   @Column(name = "role")
   @Enumerated(value = EnumType.STRING)
   private Role role;
+
+  @Column(name = "is_pending")
+  private boolean isPending;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "company_id")
   private Company company;
