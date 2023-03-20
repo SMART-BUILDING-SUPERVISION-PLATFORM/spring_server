@@ -2,13 +2,13 @@ package snust.sbsp.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 
-
-public class ResponseDto<T> {
+public class Response<T> {
 
   public static <T> ResponseEntity<T> ok(int status) {
     return new ResponseEntity<>(HttpStatus.valueOf(status));
@@ -36,6 +36,7 @@ public class ResponseDto<T> {
         .build());
   }
 
+  @Getter
   @Builder
   @AllArgsConstructor
   private static class ErrorResponse {
