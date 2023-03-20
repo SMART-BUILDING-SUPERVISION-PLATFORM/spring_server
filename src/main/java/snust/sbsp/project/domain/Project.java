@@ -16,29 +16,40 @@ import java.util.List;
 @AllArgsConstructor
 @Entity(name = "project")
 public class Project {
+
   @OneToMany(mappedBy = "project")
   List<Participant> ParticipantList = new ArrayList<>();
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
   @Column(name = "name")
   private String name;
+
   @Column(name = "start_date")
   private LocalDate startDate;
+
   @Column(name = "end_date")
   private LocalDate endDate;
+
   @Column(name = "process_rate")
   private Integer processRate;
+
   @Column(name = "ctr_type")
   @Enumerated(value = EnumType.STRING)
   private CtrType ctrType;
+
   @Column(name = "detail_ctr_type")
   @Enumerated(value = EnumType.STRING)
   private DetailCtrType detailCtrType;
+
   @Column(name = "thumbnail_url")
   private String thumbnailUrl;
+
   @Column(name = "floor_url")
   private String floorUrl;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "company_id")
   private Company company;

@@ -14,15 +14,20 @@ import java.util.List;
 @AllArgsConstructor
 @Entity(name = "company")
 public class Company {
+
   @OneToMany(mappedBy = "company")
   List<Crew> crewList = new ArrayList<>();
+
   @OneToMany(mappedBy = "company")
   List<Project> projectList = new ArrayList<>();
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
   @Column(name = "name")
   private String name;
+  
   @Column(name = "address")
   private String address;
 }
