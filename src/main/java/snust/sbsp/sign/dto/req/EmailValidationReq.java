@@ -1,21 +1,14 @@
 package snust.sbsp.sign.dto.req;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
 
 @Getter
-@NoArgsConstructor
-public class EmailValidationReqDto {
-  private String email;
-  private String code;
+@AllArgsConstructor
+public class EmailValidationReq {
 
-  @Builder
-  public EmailValidationReqDto(
-    String email,
-    String code
-  ) {
-    this.email = email;
-    this.code = code;
-  }
+  private String email;
+
+  private String code;
 }

@@ -1,18 +1,13 @@
 package snust.sbsp.sign.dto.req;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
-public class SigninReqDto {
-  private String email;
-  private String password;
+@AllArgsConstructor
+public class SignInReq {
 
-  @Builder
-  public SigninReqDto(String email, String password) {
-    this.email = email;
-    this.password = password;
-  }
+  private String email;
+
+  private String password;
 }
