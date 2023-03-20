@@ -1,6 +1,6 @@
 package snust.sbsp.sign.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import snust.sbsp.company.domain.Company;
@@ -8,8 +8,8 @@ import snust.sbsp.company.repository.CompanyRepository;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.repository.CrewRepository;
-import snust.sbsp.sign.dto.req.SigninReqDto;
-import snust.sbsp.sign.dto.req.SignupReqDto;
+import snust.sbsp.sign.dto.req.SignInReq;
+import snust.sbsp.sign.dto.req.SignUpReq;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -22,50 +22,51 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SignService {
+
   private final CrewRepository crewRepository;
+
   private final CompanyRepository companyRepository;
+
   @Value("${crypto.algorithm}")
   String alg;
+
   @Value("${crypto.aes-iv}")
   String aesIv;
+
   @Value("${crypto.aes-key}")
   String aesKey;
 
-  @Autowired
-  public SignService(
-    CrewRepository crewRepository,
-    CompanyRepository companyRepository
-  ) {
-    this.crewRepository = crewRepository;
-    this.companyRepository = companyRepository;
-  }
-
-  public Long join(SignupReqDto signupReqDto) {
-    Long companyId = signupReqDto.getCompanyId();
+  public Long join(SignUpReq signupReq) {
+    Long companyId = signupReq.getCompanyId();
     Optional<Company> company = companyRepository.findById(companyId);
     if (company.isEmpty()) {
       return null;
     }
-    if (!isPossibleToJoin(signupReqDto)) {
+    if (!isPossibleToJoin(signupReq)) {
       return null;
+    }
+    if (isEmailDuplicated(signupReq.getEmail())) {
+      return -1L;
     }
     Crew crew = Crew.builder()
       .company(company.get())
-      .email(signupReqDto.getEmail())
-      .password(encryptPassword(signupReqDto))
-      .name(signupReqDto.getName())
-      .phone(signupReqDto.getNumber())
-      .businessType(signupReqDto.getBusinessType())
-      .role(signupReqDto.getBusinessType().equals("관리자") ? Role.COMPANY_ADMIN : Role.PENDING)
+      .email(signupReq.getEmail())
+      .password(encryptPassword(signupReq))
+      .name(signupReq.getName())
+      .phone(signupReq.getNumber())
+      .businessType(signupReq.getBusinessType())
+      .role(signupReq.getBusinessType().equals("관리자") ? Role.COMPANY_ADMIN : Role.USER)
+      .isPending(true)
       .build();
     return crewRepository.save(crew).getId();
   }
 
-  public Optional<Crew> validateCrew(SigninReqDto signInReqDto) {
-    Optional<Crew> member = crewRepository.findByEmail(signInReqDto.getEmail());
+  public Optional<Crew> validateCrew(SignInReq signInReq) {
+    Optional<Crew> member = crewRepository.findByEmail(signInReq.getEmail());
     if (member.isPresent()) {
-      String inComingCode = signInReqDto.getEmail() + signInReqDto.getPassword();
+      String inComingCode = signInReq.getEmail() + signInReq.getPassword();
       String decryptedPassword = decryptPassword(member.get().getPassword());
       if (inComingCode.equals(decryptedPassword)) {
         return member;
@@ -77,18 +78,13 @@ public class SignService {
     }
   }
 
-  public Optional<Crew> isEmailDuplicated(String email) {
-    return crewRepository.findByEmail(email);
+  public boolean isEmailDuplicated(String email) {
+    return crewRepository.findByEmail(email).isPresent();
   }
 
-  private Optional<Company> getCompany(SignupReqDto signUpReqDto) {
-    Long companyId = signUpReqDto.getCompanyId();
-    return companyRepository.findById(companyId);
-  }
-
-  private boolean isPossibleToJoin(SignupReqDto signUpReqDto) {
-    String businessType = signUpReqDto.getBusinessType();
-    boolean isAdminPresent = isAdminPresent(signUpReqDto);
+  private boolean isPossibleToJoin(SignUpReq signUpReq) {
+    String businessType = signUpReq.getBusinessType();
+    boolean isAdminPresent = isAdminPresent(signUpReq);
     if (businessType.equals("관리자") && isAdminPresent) {
       return false;
     } else if (businessType.equals("관리자")) {
@@ -98,8 +94,8 @@ public class SignService {
     }
   }
 
-  private boolean isAdminPresent(SignupReqDto signUpReqDto) {
-    Long companyId = signUpReqDto.getCompanyId();
+  private boolean isAdminPresent(SignUpReq signUpReq) {
+    Long companyId = signUpReq.getCompanyId();
     Optional<Company> company = companyRepository.findById(companyId);
     if (company.isPresent()) {
       List<Crew> companyCrewList = company.get().getCrewList();
@@ -111,9 +107,9 @@ public class SignService {
     return false;
   }
 
-  private String encryptPassword(SignupReqDto signUpReqDto) {
+  private String encryptPassword(SignUpReq signUpReq) {
     String encryptedCode = "";
-    String target = signUpReqDto.getEmail() + signUpReqDto.getPassword();
+    String target = signUpReq.getEmail() + signUpReq.getPassword();
     try {
       Cipher cipher = Cipher.getInstance(alg);
       SecretKeySpec keySpec = new SecretKeySpec(aesKey.getBytes(), "AES");
