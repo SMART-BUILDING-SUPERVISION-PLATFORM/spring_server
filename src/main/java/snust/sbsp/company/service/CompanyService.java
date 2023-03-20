@@ -1,32 +1,29 @@
 package snust.sbsp.company.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import snust.sbsp.company.domain.Company;
-import snust.sbsp.company.dto.res.CompanyResDto;
+import snust.sbsp.company.dto.res.CompanyRes;
 import snust.sbsp.company.repository.CompanyRepository;
 
 import javax.transaction.Transactional;
 import java.net.URLDecoder;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CompanyService {
+
   private final CompanyRepository companyRepository;
 
-  @Autowired
-  public CompanyService(CompanyRepository companyRepository) {
-    this.companyRepository = companyRepository;
+  public List<CompanyRes> findByName(String companyName) {
+    String decodedCompanyName = URLDecoder.decode(companyName);
+    return findCompanyListByPartOfName(decodedCompanyName);
   }
 
-  public Optional<Company> findById(Long companyId) {
-    return companyRepository.findById(companyId);
-  }
-
-  public List<CompanyResDto> findByName(String companyName) {
+  private List<CompanyRes> findCompanyListByPartOfName(String decodedCompanyName) {
     List<Company> companyList = companyRepository
       .findAll()
       .stream()
@@ -34,14 +31,8 @@ public class CompanyService {
         company ->
           company
             .getName()
-            .contains(URLDecoder.decode(companyName)))
-      .collect(Collectors.toList());
-    return companyList.stream().map(company ->
-        CompanyResDto.builder()
-          .id(company.getId())
-          .name(company.getName())
-          .address(company.getAddress())
-          .build())
-      .collect(Collectors.toList());
+            .contains(decodedCompanyName)
+      ).collect(Collectors.toList());
+    return companyList.stream().map(CompanyRes::new).collect(Collectors.toList());
   }
 }
