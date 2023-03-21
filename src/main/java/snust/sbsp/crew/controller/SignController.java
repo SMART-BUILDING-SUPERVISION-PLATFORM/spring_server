@@ -37,11 +37,8 @@ public class SignController {
 
   @PostMapping("/sign-up")
   public ResponseEntity<?> join(@RequestBody SignUpReq signUpReq) {
-    Long crewId = signService.join(signUpReq);
-    if (crewId == null)
-      return Response.fail(400, "company you've been selected has admin.");
-    if (crewId < 0)
-      return Response.fail(401, "email duplicated.");
+    signService.join(signUpReq);
+
     return Response.ok(201);
   }
 
@@ -50,14 +47,9 @@ public class SignController {
     @RequestBody SignInReq signInReq,
     HttpServletRequest request
   ) {
-    Optional<Crew> crew = signService.validateCrew(signInReq);
-    if (crew.isEmpty()) {
-      return Response.fail(404, "crew not found");
-    }
-    if (crew.get().isPending()) {
-      return Response.fail(403, "you are in pending state.");
-    }
-    ResponseCookie responseCookie = sessionUtil.createCookie(crew.get(), request);
+    Crew crew = signService.validateCrew(signInReq);
+
+    ResponseCookie responseCookie = sessionUtil.createCookie(crew, request);
     return Response.ok(200, null, responseCookie);
   }
 
@@ -68,19 +60,15 @@ public class SignController {
     ) String jSessionId,
     HttpServletRequest request
   ) {
-    boolean isSessionRemoved = sessionUtil.removeSession(jSessionId, request);
-    if (isSessionRemoved) {
-      return Response.ok(200);
-    }
-    return Response.fail(401, "sign-out failed.");
+    sessionUtil.removeSession(jSessionId, request);
+
+    return Response.ok(200);
   }
 
   @GetMapping("/company-list")
   public ResponseEntity<?> validateCompany(@PathParam("companyName") String companyName) {
     List<CompanyRes> companyList = companyService.findByName(companyName);
-    if (companyList.size() == 0) {
-      return Response.fail(404, "company not found");
-    }
+
     return Response.ok(200, companyList);
   }
 
@@ -88,9 +76,7 @@ public class SignController {
   public ResponseEntity<?> validateEmail(
     @RequestBody EmailValidationReq emailValidationReq) {
     String email = emailValidationReq.getEmail();
-    if (signService.isEmailDuplicated(email)) {
-      return Response.fail(401, "email duplicated");
-    }
+    signService.isEmailDuplicated(email);
     try {
       emailUtil.sendSimpleMessage(email);
       return Response.ok(200);
@@ -103,11 +89,8 @@ public class SignController {
   public ResponseEntity<?> validateCode(
     @RequestBody EmailValidationReq emailValidationReq
   ) {
-    String email = emailValidationReq.getEmail();
-    String code = emailValidationReq.getCode();
-    boolean isValidateCode = emailUtil.isValidateCode(email, code);
-    if (isValidateCode)
-      return Response.ok(200);
-    return Response.fail(404, "code not found");
+    emailUtil.isValidateCode(emailValidationReq);
+
+    return Response.ok(200);
   }
 }

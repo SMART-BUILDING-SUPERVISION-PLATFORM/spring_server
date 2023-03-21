@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import snust.sbsp.common.exception.CustomCommonException;
+import snust.sbsp.common.exception.ErrorCode;
+import snust.sbsp.crew.dto.req.EmailValidationReq;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -82,16 +85,19 @@ public class EmailUtil {
     }
   }
 
-  public boolean isValidateCode(String email, String code) {
+  public void isValidateCode(EmailValidationReq request) {
+    String email = request.getEmail();
+    String code = request.getCode();
+
     String serverCode = redisUtil.getData(email);
     if (serverCode == null) {
-      return false;
+      throw new CustomCommonException(ErrorCode.EMAIL_CODE_NOT_FOUND);
     }
     if (serverCode.equals(code)) {
       redisUtil.deleteData(email);
-      return true;
     }
-    return false;
+
+
   }
 }
 

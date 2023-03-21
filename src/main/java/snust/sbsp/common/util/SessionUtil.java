@@ -27,11 +27,10 @@ public class SessionUtil {
       .build();
   }
 
-  public boolean removeSession(String jSessionId, HttpServletRequest request) {
+  public void removeSession(String jSessionId, HttpServletRequest request) {
     HttpSession session = request.getSession();
     session.removeAttribute(jSessionId);
     Long memberId = (Long) session.getAttribute(jSessionId);
-    return memberId == null;
   }
 
   public String createSession(

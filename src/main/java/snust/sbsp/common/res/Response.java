@@ -1,10 +1,11 @@
 package snust.sbsp.common.res;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import snust.sbsp.common.dto.ErrorResponse;
 
 public class Response<T> {
 
@@ -28,9 +29,13 @@ public class Response<T> {
   public static ResponseEntity<ErrorResponse> fail(int errStatus, String errorMessage) {
     return ResponseEntity
       .status(HttpStatus.valueOf(errStatus))
-      .body(ErrorResponse.builder()
-        .status(errStatus)
-        .errorMessage(errorMessage)
-        .build());
+      .body(new ErrorResponse(errStatus, errorMessage));
+  }
+
+  @Getter
+  @AllArgsConstructor
+  static class ErrorResponse {
+    private final int status;
+    private final String errorMessage;
   }
 }

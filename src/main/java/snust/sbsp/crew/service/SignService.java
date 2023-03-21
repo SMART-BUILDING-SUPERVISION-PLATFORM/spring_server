@@ -3,6 +3,9 @@ package snust.sbsp.crew.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import snust.sbsp.common.exception.CustomCommonException;
+import snust.sbsp.common.exception.ErrorCode;
+import snust.sbsp.common.res.Response;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.company.repository.CompanyRepository;
 import snust.sbsp.crew.domain.Crew;
@@ -41,15 +44,10 @@ public class SignService {
     public Long join(SignUpReq signupReq) {
         Long companyId = signupReq.getCompanyId();
         Optional<Company> company = companyRepository.findById(companyId);
-        if (company.isEmpty()) {
-            return null;
-        }
-        if (!isPossibleToJoin(signupReq)) {
-            return null;
-        }
-        if (isEmailDuplicated(signupReq.getEmail())) {
-            return -1L;
-        }
+
+        isPossibleToJoin(signupReq);
+        isEmailDuplicated(signupReq.getEmail());
+
         Crew crew = Crew.builder()
                 .company(company.get())
                 .email(signupReq.getEmail())
@@ -63,34 +61,39 @@ public class SignService {
         return crewRepository.save(crew).getId();
     }
 
-    public Optional<Crew> validateCrew(SignInReq signInReq) {
-        Optional<Crew> member = crewRepository.findByEmail(signInReq.getEmail());
-        if (member.isPresent()) {
+    public Crew validateCrew(SignInReq signInReq) {
+        Optional<Crew> crewOptional = crewRepository.findByEmail(signInReq.getEmail());
+        if (crewOptional.isPresent()) {
             String inComingCode = signInReq.getEmail() + signInReq.getPassword();
-            String decryptedPassword = decryptPassword(member.get().getPassword());
+
+            Crew crew = crewOptional.get();
+            String decryptedPassword = decryptPassword(crew.getPassword());
             if (inComingCode.equals(decryptedPassword)) {
-                return member;
+                if (crew.isPending()) {
+                    throw new CustomCommonException(ErrorCode.PENDING_LOGIN);
+                }
+                return crew;
             } else {
-                return Optional.empty();
+                throw new CustomCommonException(ErrorCode.PASSWORD_INVALID);
             }
         } else {
-            return Optional.empty();
+            throw new CustomCommonException(ErrorCode.USER_NOT_FOUND);
         }
     }
 
-    public boolean isEmailDuplicated(String email) {
-        return crewRepository.findByEmail(email).isPresent();
+    public void isEmailDuplicated(String email) {
+        if (crewRepository.findByEmail(email).isPresent()) {
+            throw new CustomCommonException(ErrorCode.EMAIL_DUPLICATED);
+        }
     }
 
-    private boolean isPossibleToJoin(SignUpReq signUpReq) {
+    private void isPossibleToJoin(SignUpReq signUpReq) {
         String businessType = signUpReq.getBusinessType();
+
         boolean isAdminPresent = isAdminPresent(signUpReq);
+
         if (businessType.equals("관리자") && isAdminPresent) {
-            return false;
-        } else if (businessType.equals("관리자")) {
-            return true;
-        } else {
-            return true;
+            throw new CustomCommonException(ErrorCode.COMPANY_HAS_ADMIN);
         }
     }
 
