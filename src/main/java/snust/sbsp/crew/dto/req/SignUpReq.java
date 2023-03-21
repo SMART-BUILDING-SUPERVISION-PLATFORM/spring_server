@@ -1,4 +1,4 @@
-package snust.sbsp.sign.dto.req;
+package snust.sbsp.crew.dto.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -16,9 +16,6 @@ import java.util.List;
 @Entity(name = "crew")
 public class Crew {
 
-  @OneToMany(mappedBy = "crew")
-  List<Participant> participantList = new ArrayList<>();
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -48,4 +45,7 @@ public class Crew {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "company_id")
   private Company company;
+
+  @OneToMany(mappedBy = "crew")
+  private List<Participant> participantList = new ArrayList<>();
 }

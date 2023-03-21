@@ -1,4 +1,4 @@
-package snust.sbsp.sign.controller;
+package snust.sbsp.crew.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -10,10 +10,10 @@ import snust.sbsp.common.util.SessionUtil;
 import snust.sbsp.company.dto.res.CompanyRes;
 import snust.sbsp.company.service.CompanyService;
 import snust.sbsp.crew.domain.Crew;
-import snust.sbsp.sign.dto.req.EmailValidationReq;
-import snust.sbsp.sign.dto.req.SignInReq;
-import snust.sbsp.sign.dto.req.SignUpReq;
-import snust.sbsp.sign.service.SignService;
+import snust.sbsp.crew.dto.req.EmailValidationReq;
+import snust.sbsp.crew.dto.req.SignInReq;
+import snust.sbsp.crew.dto.req.SignUpReq;
+import snust.sbsp.crew.service.SignService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;

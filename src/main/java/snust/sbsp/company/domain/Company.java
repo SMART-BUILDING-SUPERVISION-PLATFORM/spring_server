@@ -15,12 +15,6 @@ import java.util.List;
 @Entity(name = "company")
 public class Company {
 
-  @OneToMany(mappedBy = "company")
-  List<Crew> crewList = new ArrayList<>();
-
-  @OneToMany(mappedBy = "company")
-  List<Project> projectList = new ArrayList<>();
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -30,4 +24,10 @@ public class Company {
   
   @Column(name = "address")
   private String address;
+
+  @OneToMany(mappedBy = "company")
+  private List<Crew> crewList = new ArrayList<>();
+
+  @OneToMany(mappedBy = "company")
+  private List<Project> projectList = new ArrayList<>();
 }
