@@ -1,5 +1,6 @@
 package snust.sbsp.common.util;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 @Transactional
 public class EmailUtil {
@@ -28,15 +30,6 @@ public class EmailUtil {
   private String port;
   @Value("${spring.mail.password}")
   private String password;
-
-  @Autowired
-  EmailUtil(
-    JavaMailSender javaMailSender,
-    RedisUtil redisUtil
-  ) {
-    this.javaMailSender = javaMailSender;
-    this.redisUtil = redisUtil;
-  }
 
   private String createCode() {
     Random random = new Random();
