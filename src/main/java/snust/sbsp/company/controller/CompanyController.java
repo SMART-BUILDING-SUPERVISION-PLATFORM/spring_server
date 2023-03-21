@@ -20,9 +20,9 @@ public class CompanyController {
 
     private final CompanyService companyService;
 
-    @GetMapping("")
-    public ResponseEntity<?> validateCompany(@PathParam("companyName") String companyName) {
-        List<CompanyRes> companyList = companyService.findByName(companyName);
+    @GetMapping
+    public ResponseEntity<?> validateCompany(@PathParam("name") String name) {
+        List<CompanyRes> companyList = companyService.findByName(name);
 
         return Response.ok(HttpStatus.OK, companyList);
     }

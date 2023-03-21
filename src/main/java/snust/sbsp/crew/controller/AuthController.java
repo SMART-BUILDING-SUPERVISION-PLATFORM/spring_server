@@ -59,15 +59,13 @@ public class AuthController {
 
     @PostMapping("/email-duplication")
     public ResponseEntity<?> validateEmail(
-            @RequestBody EmailValidationReq emailValidationReq) {
+            @RequestBody EmailValidationReq emailValidationReq
+    ) {
         String email = emailValidationReq.getEmail();
         authService.isEmailDuplicated(email);
-        try {
-            emailUtil.sendSimpleMessage(email);
-            return Response.ok(HttpStatus.OK);
-        } catch (Exception e) {
-            throw new CustomCommonException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
+        emailUtil.sendSimpleMessage(email);
+        return Response.ok(HttpStatus.OK);
+
     }
 
     @PostMapping("/validate-code")

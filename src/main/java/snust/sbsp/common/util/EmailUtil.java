@@ -69,19 +69,18 @@ public class EmailUtil {
     return message;
   }
 
-  public void sendSimpleMessage(String to) throws Exception {
+  public void sendSimpleMessage(String to) {
     MimeMessage message;
     String code = createCode();
-    message = createMessage(to, code);
-    if (redisUtil.getData(to) != null) {
-      redisUtil.deleteData(to);
-    }
-    redisUtil.setDataExpire(to, code);
     try {
+      message = createMessage(to, code);
+      if (redisUtil.getData(to) != null) {
+        redisUtil.deleteData(to);
+      }
+      redisUtil.setDataExpire(to, code);
       javaMailSender.send(message);
-    } catch (MailException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException();
+    } catch (Exception e) {
+      throw new CustomCommonException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -90,14 +89,16 @@ public class EmailUtil {
     String code = request.getCode();
 
     String serverCode = redisUtil.getData(email);
-    if (serverCode == null) {
+    if (serverCode == null)
       throw new CustomCommonException(ErrorCode.EMAIL_CODE_NOT_FOUND);
-    }
+
     if (serverCode.equals(code)) {
       redisUtil.deleteData(email);
+      return;
     }
 
-
+    throw new CustomCommonException(ErrorCode.EMAIL_CODE_INVALID);
   }
+
 }
 

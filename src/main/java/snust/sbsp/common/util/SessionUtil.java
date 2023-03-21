@@ -30,7 +30,6 @@ public class SessionUtil {
   public void removeSession(String jSessionId, HttpServletRequest request) {
     HttpSession session = request.getSession();
     session.removeAttribute(jSessionId);
-    Long memberId = (Long) session.getAttribute(jSessionId);
   }
 
   public String createSession(
