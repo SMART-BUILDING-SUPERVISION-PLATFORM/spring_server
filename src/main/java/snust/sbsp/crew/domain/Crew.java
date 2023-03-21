@@ -1,36 +1,51 @@
 package snust.sbsp.crew.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.crew.domain.type.Role;
+import snust.sbsp.project.domain.Participant;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
+@AllArgsConstructor
+@Entity(name = "crew")
 public class Crew {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String email;
+  @Column(name = "email")
+  private String email;
 
-    private String password;
+  @Column(name = "password")
+  private String password;
 
-    private String name;
+  @Column(name = "name")
+  private String name;
 
-    private String phone;
+  @Column(name = "phone")
+  private String phone;
 
-    private String businessType;
+  @Column(name = "business_type")
+  private String businessType;
 
-    @Enumerated(value = EnumType.STRING)
-    private Role role;
+  @Column(name = "role")
+  @Enumerated(value = EnumType.STRING)
+  private Role role;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
+  @Column(name = "is_pending")
+  private boolean isPending;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "company_id")
+  private Company company;
+
+  @OneToMany(mappedBy = "crew")
+  private List<Participant> participantList = new ArrayList<>();
 }

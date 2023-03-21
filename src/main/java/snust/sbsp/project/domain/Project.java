@@ -1,43 +1,56 @@
 package snust.sbsp.project.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.project.domain.type.CtrType;
 import snust.sbsp.project.domain.type.DetailCtrType;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
+@AllArgsConstructor
+@Entity(name = "project")
 public class Project {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String name;
+  @Column(name = "name")
+  private String name;
 
-    private LocalDate start_date;
+  @Column(name = "start_date")
+  private LocalDate startDate;
 
-    private LocalDate end_date;
+  @Column(name = "end_date")
+  private LocalDate endDate;
 
-    private Integer process_rate;
+  @Column(name = "process_rate")
+  private Integer processRate;
 
-    @Enumerated(value = EnumType.STRING)
-    private CtrType ctrType;
+  @Column(name = "ctr_type")
+  @Enumerated(value = EnumType.STRING)
+  private CtrType ctrType;
 
-    @Enumerated(value = EnumType.STRING)
-    private DetailCtrType detailCtrType;
+  @Column(name = "detail_ctr_type")
+  @Enumerated(value = EnumType.STRING)
+  private DetailCtrType detailCtrType;
 
-    private String thumbnail_url;
+  @Column(name = "thumbnail_url")
+  private String thumbnailUrl;
 
-    private String floor_url;
+  @Column(name = "floor_url")
+  private String floorUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "company_id")
+  private Company company;
+
+  @OneToMany(mappedBy = "project")
+  private List<Participant> ParticipantList = new ArrayList<>();
 }

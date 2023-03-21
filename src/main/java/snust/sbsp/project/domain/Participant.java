@@ -1,30 +1,31 @@
 package snust.sbsp.project.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import snust.sbsp.crew.domain.Crew;
-import snust.sbsp.crew.domain.type.Role;
+import snust.sbsp.project.domain.type.Role;
 
 import javax.persistence.*;
 
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
+@AllArgsConstructor
+@Entity(name = "participant")
 public class Participant {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Enumerated(value = EnumType.STRING)
-    private Role role;
+  @Column(name = "role")
+  @Enumerated(value = EnumType.STRING)
+  private Role role;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "crew_id")
-    private Crew crew;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "crew_id")
+  private Crew crew;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
-    private Project project;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "project_id")
+  private Project project;
 }

@@ -1,25 +1,33 @@
 package snust.sbsp.company.domain;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import snust.sbsp.crew.domain.Crew;
+import snust.sbsp.project.domain.Project;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
+@AllArgsConstructor
+@Entity(name = "company")
 public class Company {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String name;
+  @Column(name = "name")
+  private String name;
+  
+  @Column(name = "address")
+  private String address;
 
-    private String address;
+  @OneToMany(mappedBy = "company")
+  private List<Crew> crewList = new ArrayList<>();
 
+  @OneToMany(mappedBy = "company")
+  private List<Project> projectList = new ArrayList<>();
 }
