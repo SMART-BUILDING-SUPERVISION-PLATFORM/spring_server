@@ -1,6 +1,7 @@
 package snust.sbsp.company.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ public class CompanyController {
     public ResponseEntity<?> validateCompany(@PathParam("companyName") String companyName) {
         List<CompanyRes> companyList = companyService.findByName(companyName);
 
-        return Response.ok(200, companyList);
+        return Response.ok(HttpStatus.OK, companyList);
     }
 
 }

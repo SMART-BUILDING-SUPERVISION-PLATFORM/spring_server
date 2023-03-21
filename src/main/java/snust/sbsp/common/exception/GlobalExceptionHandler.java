@@ -10,6 +10,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomCommonException.class)
     public ResponseEntity<?> customCommonException(CustomCommonException e) {
-        return Response.fail(e.getStatus(), e.getMessage());
+        return Response.fail(e);
     }
 }

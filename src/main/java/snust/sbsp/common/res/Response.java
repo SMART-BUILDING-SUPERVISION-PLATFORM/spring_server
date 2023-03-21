@@ -6,36 +6,37 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import snust.sbsp.common.exception.CustomCommonException;
 
 public class Response<T> {
 
-  public static <T> ResponseEntity<T> ok(int status) {
-    return new ResponseEntity<>(HttpStatus.valueOf(status));
+  public static <T> ResponseEntity<T> ok(HttpStatus httpStatus) {
+    return new ResponseEntity<>(httpStatus);
   }
 
-  public static <T> ResponseEntity<T> ok(int status, T data) {
+  public static <T> ResponseEntity<T> ok(HttpStatus httpStatus, T data) {
     return ResponseEntity
-      .status(HttpStatus.valueOf(status))
+      .status(httpStatus)
       .body(data);
   }
 
-  public static <T> ResponseEntity<T> ok(int status, T data, ResponseCookie responseCookie) {
+  public static <T> ResponseEntity<T> ok(HttpStatus httpStatus, T data, ResponseCookie responseCookie) {
     return ResponseEntity
-      .status(HttpStatus.valueOf(status))
+      .status(httpStatus)
       .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
       .body(data);
   }
 
-  public static ResponseEntity<ErrorResponse> fail(int errStatus, String errorMessage) {
+  public static ResponseEntity<ErrorResponse> fail(CustomCommonException e) {
     return ResponseEntity
-      .status(HttpStatus.valueOf(errStatus))
-      .body(new ErrorResponse(errStatus, errorMessage));
+      .status(e.getHttpStatus())
+      .body(new ErrorResponse(e.getCode(), e.getMessage()));
   }
 
   @Getter
   @AllArgsConstructor
   static class ErrorResponse {
-    private final int status;
-    private final String errorMessage;
+    private final int code;
+    private final String message;
   }
 }

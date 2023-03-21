@@ -1,9 +1,12 @@
 package snust.sbsp.crew.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import snust.sbsp.common.exception.CustomCommonException;
+import snust.sbsp.common.exception.ErrorCode;
 import snust.sbsp.common.res.Response;
 import snust.sbsp.common.util.EmailUtil;
 import snust.sbsp.common.util.SessionUtil;
@@ -28,7 +31,7 @@ public class AuthController {
     public ResponseEntity<?> join(@RequestBody SignUpReq signUpReq) {
         authService.join(signUpReq);
 
-        return Response.ok(201);
+        return Response.ok(HttpStatus.CREATED);
     }
 
     @PostMapping("/sign-in")
@@ -39,7 +42,7 @@ public class AuthController {
         Crew crew = authService.validateCrew(signInReq);
 
         ResponseCookie responseCookie = sessionUtil.createCookie(crew, request);
-        return Response.ok(200, null, responseCookie);
+        return Response.ok(HttpStatus.OK, null, responseCookie);
     }
 
     @GetMapping("/sign-out")
@@ -51,7 +54,7 @@ public class AuthController {
     ) {
         sessionUtil.removeSession(jSessionId, request);
 
-        return Response.ok(200);
+        return Response.ok(HttpStatus.OK);
     }
 
     @PostMapping("/email-duplication")
@@ -61,9 +64,9 @@ public class AuthController {
         authService.isEmailDuplicated(email);
         try {
             emailUtil.sendSimpleMessage(email);
-            return Response.ok(200);
+            return Response.ok(HttpStatus.OK);
         } catch (Exception e) {
-            return Response.fail(500, e.getMessage());
+            throw new CustomCommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -73,6 +76,6 @@ public class AuthController {
     ) {
         emailUtil.isValidateCode(emailValidationReq);
 
-        return Response.ok(200);
+        return Response.ok(HttpStatus.OK);
     }
 }
