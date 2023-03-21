@@ -29,7 +29,7 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> join(@RequestBody SignUpReq signUpReq) {
-        authService.join(signUpReq);
+        authService.signUp(signUpReq);
 
         return Response.ok(HttpStatus.CREATED);
     }
