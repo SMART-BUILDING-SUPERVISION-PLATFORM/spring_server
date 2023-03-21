@@ -19,8 +19,7 @@ public class CompanyService {
   private final CompanyRepository companyRepository;
 
   public List<CompanyRes> findByName(String companyName) {
-    String decodedCompanyName = URLDecoder.decode(companyName);
-    return findCompanyListByPartOfName(decodedCompanyName);
+    return findCompanyListByPartOfName(companyName);
   }
 
   private List<CompanyRes> findCompanyListByPartOfName(String decodedCompanyName) {

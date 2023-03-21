@@ -3,9 +3,9 @@ package snust.sbsp.crew.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
-import snust.sbsp.common.res.Response;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.company.repository.CompanyRepository;
 import snust.sbsp.crew.domain.Crew;
@@ -17,16 +17,14 @@ import snust.sbsp.crew.repository.CrewRepository;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
-public class SignService {
+public class AuthService {
 
     private final CrewRepository crewRepository;
 
@@ -41,6 +39,7 @@ public class SignService {
     @Value("${crypto.aes-key}")
     String aesKey;
 
+    @Transactional
     public Long join(SignUpReq signupReq) {
         Long companyId = signupReq.getCompanyId();
         Optional<Company> company = companyRepository.findById(companyId);
@@ -61,6 +60,7 @@ public class SignService {
         return crewRepository.save(crew).getId();
     }
 
+    @Transactional(readOnly = true)
     public Crew validateCrew(SignInReq signInReq) {
         Optional<Crew> crewOptional = crewRepository.findByEmail(signInReq.getEmail());
         if (crewOptional.isPresent()) {
@@ -81,12 +81,14 @@ public class SignService {
         }
     }
 
+    @Transactional(readOnly = true)
     public void isEmailDuplicated(String email) {
         if (crewRepository.findByEmail(email).isPresent()) {
             throw new CustomCommonException(ErrorCode.EMAIL_DUPLICATED);
         }
     }
 
+    @Transactional(readOnly = true)
     private void isPossibleToJoin(SignUpReq signUpReq) {
         String businessType = signUpReq.getBusinessType();
 
@@ -97,6 +99,7 @@ public class SignService {
         }
     }
 
+    @Transactional(readOnly = true)
     private boolean isAdminPresent(SignUpReq signUpReq) {
         Long companyId = signUpReq.getCompanyId();
         Optional<Company> company = companyRepository.findById(companyId);
