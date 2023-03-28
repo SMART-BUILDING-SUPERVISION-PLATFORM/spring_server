@@ -19,22 +19,30 @@ public class CompanyService {
   private final CompanyRepository companyRepository;
 
   @Transactional(readOnly = true)
-  public List<CompanyRes> findByName(String companyName) {
-    List<Company> companyList = companyRepository
-            .findAll()
-            .stream()
-            .filter(
-                    company ->
-                            company
-                                    .getName()
-                                    .contains(companyName)
-            ).collect(Collectors.toList());
-    return companyList.stream().map(CompanyRes::new).collect(Collectors.toList());
+  public List<CompanyRes> readCompany(String companyName) {
+    List<Company> companyList = companyRepository.findAll()
+      .stream()
+      .filter(company ->
+        company
+          .getName()
+          .toLowerCase()
+          .contains(companyName.toLowerCase())
+      ).collect(Collectors.toList());
+
+    return companyList
+      .stream()
+      .map(company ->
+        CompanyRes
+          .builder()
+          .company(company)
+          .build()
+      ).collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
   public Company findById(Long companyId) {
+
     return companyRepository.findById(companyId)
-            .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
   }
 }

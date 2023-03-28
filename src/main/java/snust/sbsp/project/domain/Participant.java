@@ -8,9 +8,9 @@ import javax.persistence.*;
 
 @Getter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Entity(name = "participant")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Participant {
 
   @Id

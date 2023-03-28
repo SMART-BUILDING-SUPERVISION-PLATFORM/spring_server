@@ -5,8 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import snust.sbsp.common.exception.CustomCommonException;
-import snust.sbsp.common.exception.ErrorCode;
 import snust.sbsp.common.res.Response;
 import snust.sbsp.common.util.EmailUtil;
 import snust.sbsp.common.util.SessionUtil;
@@ -19,61 +17,64 @@ import snust.sbsp.crew.service.AuthService;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/crew/auth")
 @RequiredArgsConstructor
+@RequestMapping("/api/crew/auth")
 public class AuthController {
 
-    private final EmailUtil emailUtil;
-    private final SessionUtil sessionUtil;
-    private final AuthService authService;
+  private final EmailUtil emailUtil;
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<?> join(@RequestBody SignUpReq signUpReq) {
-        authService.signUp(signUpReq);
+  private final SessionUtil sessionUtil;
 
-        return Response.ok(HttpStatus.CREATED);
-    }
+  private final AuthService authService;
 
-    @PostMapping("/sign-in")
-    public ResponseEntity<?> signIn(
-            @RequestBody SignInReq signInReq,
-            HttpServletRequest request
-    ) {
-        Crew crew = authService.validateCrew(signInReq);
+  @PostMapping("/sign-up")
+  public ResponseEntity<?> join(@RequestBody SignUpReq signUpReq) {
+    authService.signUp(signUpReq);
 
-        ResponseCookie responseCookie = sessionUtil.createCookie(crew, request);
-        return Response.ok(HttpStatus.OK, null, responseCookie);
-    }
+    return Response.ok(HttpStatus.CREATED);
+  }
 
-    @GetMapping("/sign-out")
-    public ResponseEntity<?> signOut(
-            @CookieValue(
-                    value = "JSESSIONID"
-            ) String jSessionId,
-            HttpServletRequest request
-    ) {
-        sessionUtil.removeSession(jSessionId, request);
+  @PostMapping("/sign-in")
+  public ResponseEntity<?> signIn(
+    @RequestBody SignInReq signInReq,
+    HttpServletRequest request
+  ) {
+    Crew crew = authService.validateCrew(signInReq);
+    ResponseCookie responseCookie = sessionUtil.createCookie(crew, request);
 
-        return Response.ok(HttpStatus.OK);
-    }
+    return Response.ok(HttpStatus.OK, null, responseCookie);
+  }
 
-    @PostMapping("/email-duplication")
-    public ResponseEntity<?> validateEmail(
-            @RequestBody EmailValidationReq emailValidationReq
-    ) {
-        String email = emailValidationReq.getEmail();
-        authService.isEmailDuplicated(email);
-        emailUtil.sendSimpleMessage(email);
-        return Response.ok(HttpStatus.OK);
+  @GetMapping("/sign-out")
+  public ResponseEntity<?> signOut(
+    @CookieValue(
+      value = "JSESSIONID"
+    ) String jSessionId,
+    HttpServletRequest request
+  ) {
+    sessionUtil.removeSession(jSessionId, request);
 
-    }
+    return Response.ok(HttpStatus.OK);
+  }
 
-    @PostMapping("/validate-code")
-    public ResponseEntity<?> validateCode(
-            @RequestBody EmailValidationReq emailValidationReq
-    ) {
-        emailUtil.isValidateCode(emailValidationReq);
+  @PostMapping("/email-duplication")
+  public ResponseEntity<?> validateEmail(
+    @RequestBody EmailValidationReq emailValidationReq
+  ) {
+    String email = emailValidationReq.getEmail();
 
-        return Response.ok(HttpStatus.OK);
-    }
+    authService.isEmailDuplicated(email);
+    emailUtil.sendSimpleMessage(email);
+
+    return Response.ok(HttpStatus.OK);
+  }
+
+  @PostMapping("/validate-code")
+  public ResponseEntity<?> validateCode(
+    @RequestBody EmailValidationReq emailValidationReq
+  ) {
+    emailUtil.isValidateCode(emailValidationReq);
+
+    return Response.ok(HttpStatus.OK);
+  }
 }

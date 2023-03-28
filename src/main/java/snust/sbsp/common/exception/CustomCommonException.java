@@ -6,12 +6,13 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class CustomCommonException extends RuntimeException {
 
-    private final int code;
-    private final HttpStatus httpStatus;
+  private final int code;
 
-    public CustomCommonException(ErrorCode errorCode) {
-        super(errorCode.getMessage());
-        this.code = errorCode.getCode();
-        this.httpStatus = errorCode.getHttpStatus();
-    }
+  private final HttpStatus httpStatus;
+
+  public CustomCommonException(ErrorCode errorCode) {
+    super(errorCode.getMessage());
+    this.code = errorCode.getCode();
+    this.httpStatus = errorCode.getHttpStatus();
+  }
 }

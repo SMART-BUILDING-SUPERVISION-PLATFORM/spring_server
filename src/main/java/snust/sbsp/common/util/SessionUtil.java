@@ -1,14 +1,14 @@
 package snust.sbsp.common.util;
 
 import org.springframework.http.ResponseCookie;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import snust.sbsp.crew.domain.Crew;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.transaction.Transactional;
 
-@Service
+@Component
 @Transactional
 public class SessionUtil {
 
@@ -16,7 +16,9 @@ public class SessionUtil {
     Crew crew,
     HttpServletRequest request
   ) {
+
     String jSessionId = createSession(crew, request);
+
     return ResponseCookie.from("JSESSIONID", jSessionId)
       .httpOnly(true)
       .secure(true)
@@ -27,7 +29,11 @@ public class SessionUtil {
       .build();
   }
 
-  public void removeSession(String jSessionId, HttpServletRequest request) {
+  public void removeSession(
+    String jSessionId,
+    HttpServletRequest request
+  ) {
+
     HttpSession session = request.getSession();
     session.removeAttribute(jSessionId);
   }
@@ -36,9 +42,11 @@ public class SessionUtil {
     Crew crew,
     HttpServletRequest request
   ) {
+
     HttpSession session = request.getSession();
     String sessionId = session.getId();
     session.setAttribute(sessionId, crew.getId());
+
     return sessionId;
   }
 }

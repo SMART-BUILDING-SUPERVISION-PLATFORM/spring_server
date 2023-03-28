@@ -1,24 +1,34 @@
 package snust.sbsp.company.dto.res;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import snust.sbsp.company.domain.Company;
+import snust.sbsp.company.dto.res.base.CompanyDto;
+import snust.sbsp.crew.dto.res.base.CrewDto;
+import snust.sbsp.project.dto.res.base.ProjectDto;
+
+import java.util.List;
 
 @Getter
 @Builder
-@AllArgsConstructor
-public class CompanyRes {
+public class CompanyRes extends CompanyDto {
 
-  private Long id;
+  @JsonIgnore
+  private Company company;
 
-  private String name;
+  private List<CrewDto> crewList;
 
-  private String address;
+  private List<ProjectDto> projectList;
 
-  public CompanyRes(Company company) {
-    this.id = company.getId();
-    this.name = company.getName();
-    this.address = company.getAddress();
+  public CompanyRes(
+    Company company,
+    List<CrewDto> crewList,
+    List<ProjectDto> projectList
+  ) {
+    super(company);
+    this.crewList = crewList;
+    this.projectList = projectList;
   }
 }
+

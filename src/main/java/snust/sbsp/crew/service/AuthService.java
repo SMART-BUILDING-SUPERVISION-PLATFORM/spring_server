@@ -14,78 +14,89 @@ import snust.sbsp.crew.dto.req.SignInReq;
 import snust.sbsp.crew.dto.req.SignUpReq;
 import snust.sbsp.crew.repository.CrewRepository;
 
-import java.util.List;
-import java.util.Optional;
-
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    private final CrewRepository crewRepository;
-    private final CompanyService companyService;
-    private final CrewService crewService;
-    private final CryptoUtil cryptoUtil;
+  private final CrewRepository crewRepository;
 
-    @Transactional
-    public void signUp(SignUpReq signupReq) {
-        Long companyId = signupReq.getCompanyId();
-        Company company = companyService.findById(companyId);
+  private final CompanyService companyService;
 
-        if (signupReq.getBusinessType().equals("관리자")) {
-            isPossibleToJoin(signupReq);
-        }
+  private final CrewService crewService;
 
-        isEmailDuplicated(signupReq.getEmail());
+  private final CryptoUtil cryptoUtil;
 
-        Crew crew = Crew.builder()
-                .company(company)
-                .email(signupReq.getEmail())
-                .password(cryptoUtil.encrypt(signupReq.getPassword()))
-                .name(signupReq.getName())
-                .phone(signupReq.getNumber())
-                .businessType(signupReq.getBusinessType())
-                .role(signupReq.getBusinessType().equals("관리자") ? Role.COMPANY_ADMIN : Role.USER)
-                .isPending(true)
-                .build();
-        crewRepository.save(crew);
-    }
+  @Transactional
+  public void signUp(SignUpReq signupReq) {
+    Long companyId = signupReq.getCompanyId();
+    Company company = companyService.findById(companyId);
 
-    @Transactional(readOnly = true)
-    public Crew validateCrew(SignInReq signInReq) {
-        Crew crew = crewService.readCrew(signInReq.getEmail());
-        String decryptedPassword = cryptoUtil.decrypt(crew.getPassword());
+    if (signupReq.getBusinessType().equals(Role.COMPANY_ADMIN.getValue()))
+      isPossibleToJoin(signupReq);
 
-        if (signInReq.getPassword().equals(decryptedPassword)) {
-            if (crew.isPending()) {
-                throw new CustomCommonException(ErrorCode.PENDING_LOGIN);
-            }
-            return crew;
-        } else {
-            throw new CustomCommonException(ErrorCode.PASSWORD_INVALID);
-        }
-    }
+    isEmailDuplicated(signupReq.getEmail());
 
-    @Transactional(readOnly = true)
-    public void isEmailDuplicated(String email) {
-        if (crewRepository.findByEmail(email).isPresent()) {
-            throw new CustomCommonException(ErrorCode.EMAIL_DUPLICATED);
-        }
-    }
+    Crew crew = Crew.builder()
+      .company(company)
+      .email(signupReq.getEmail())
+      .password(cryptoUtil.encrypt(signupReq.getPassword()))
+      .name(signupReq.getName())
+      .phone(signupReq.getNumber())
+      .role(selectRole(signupReq.getBusinessType()))
+      .isPending(true)
+      .build();
 
-    private void isPossibleToJoin(SignUpReq signUpReq) {
-        if (isAdminPresent(signUpReq)) {
-            throw new CustomCommonException(ErrorCode.COMPANY_HAS_ADMIN);
-        }
-    }
+    crewRepository.save(crew);
+  }
 
-    private boolean isAdminPresent(SignUpReq signUpReq) {
-        Long companyId = signUpReq.getCompanyId();
-        Company company = companyService.findById(companyId);
-        List<Crew> companyCrewList = company.getCrewList();
-        Optional<Crew> companyAdmin = companyCrewList.stream().filter(crew ->
-                crew.getRole().equals(Role.COMPANY_ADMIN)
-        ).findAny();
-        return companyAdmin.isPresent();
-    }
+  @Transactional(readOnly = true)
+  public Crew validateCrew(SignInReq signInReq) {
+    Crew crew = crewService.readCrew(signInReq.getEmail());
+    String decryptedPassword = cryptoUtil.decrypt(crew.getPassword());
 
+    if (signInReq.getPassword().equals(decryptedPassword)) {
+      if (crew.isPending())
+        throw new CustomCommonException(ErrorCode.PENDING_STATE);
+      return crew;
+    } else
+      throw new CustomCommonException(ErrorCode.PASSWORD_INVALID);
+  }
+
+  @Transactional(readOnly = true)
+  public void isEmailDuplicated(String email) {
+    if (crewRepository.findByEmail(email).isPresent())
+      throw new CustomCommonException(ErrorCode.EMAIL_DUPLICATED);
+  }
+
+  private void isPossibleToJoin(SignUpReq signUpReq) {
+    if (isAdminPresent(signUpReq))
+      throw new CustomCommonException(ErrorCode.COMPANY_HAS_ADMIN);
+  }
+
+  @Transactional(readOnly = true)
+  private boolean isAdminPresent(SignUpReq signUpReq) {
+    Company company = companyService.findById(signUpReq.getCompanyId());
+
+    return company.getCrewList()
+      .stream()
+      .anyMatch(crew -> crew.getRole().equals(Role.COMPANY_ADMIN));
+  }
+
+  private Role selectRole(String businessType) {
+    Role crewRole;
+    if (businessType.equals(Role.COMPANY_ADMIN.getValue()))
+      crewRole = Role.COMPANY_ADMIN;
+    else if (businessType.equals(Role.ORDER.getValue()))
+      crewRole = Role.ORDER;
+    else if (businessType.equals(Role.SUPERVISOR.getValue()))
+      crewRole = Role.SUPERVISOR;
+    else if (businessType.equals(Role.CONSTRUCTION.getValue()))
+      crewRole = Role.CONSTRUCTION;
+    else if (businessType.equals(Role.DESIGN.getValue()))
+      crewRole = Role.DESIGN;
+    else
+      throw new CustomCommonException(ErrorCode.BUSINESS_TYPE_INVALID);
+    
+    return crewRole;
+  }
 }

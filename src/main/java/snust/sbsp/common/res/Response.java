@@ -30,13 +30,20 @@ public class Response<T> {
   public static ResponseEntity<ErrorResponse> fail(CustomCommonException e) {
     return ResponseEntity
       .status(e.getHttpStatus())
-      .body(new ErrorResponse(e.getCode(), e.getMessage()));
+      .body(new ErrorResponse(e));
   }
 
   @Getter
   @AllArgsConstructor
   static class ErrorResponse {
+
     private final int code;
+    
     private final String message;
+
+    ErrorResponse(CustomCommonException e) {
+      this.code = e.getCode();
+      this.message = e.getMessage();
+    }
   }
 }

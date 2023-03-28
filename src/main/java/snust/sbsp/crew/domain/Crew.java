@@ -11,9 +11,9 @@ import java.util.List;
 
 @Getter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Entity(name = "crew")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Crew {
 
   @Id
@@ -31,9 +31,6 @@ public class Crew {
 
   @Column(name = "phone")
   private String phone;
-
-  @Column(name = "business_type")
-  private String businessType;
 
   @Column(name = "role")
   @Enumerated(value = EnumType.STRING)
