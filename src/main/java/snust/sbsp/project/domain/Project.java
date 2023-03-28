@@ -31,7 +31,7 @@ public class Project {
   private LocalDate endDate;
 
   @Column(name = "process_rate")
-  private Integer processRate;
+  private int processRate;
 
   @Column(name = "ctr_type")
   @Enumerated(value = EnumType.STRING)
