@@ -5,9 +5,13 @@ import snust.sbsp.crew.domain.Crew;
 
 @Getter
 public class CrewDto {
+
   private final Long id;
+
   private final String name;
+
   private final String email;
+
   private final String phone;
 
   private final boolean isPending;

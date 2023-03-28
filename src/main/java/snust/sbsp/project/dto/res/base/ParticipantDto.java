@@ -5,8 +5,11 @@ import snust.sbsp.project.domain.Participant;
 
 @Getter
 public class ParticipantDto {
+
   private final Long id;
+
   private final String name;
+  
   private final RoleDto role;
 
   public ParticipantDto(Participant participant) {

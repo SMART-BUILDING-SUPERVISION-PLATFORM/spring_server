@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProjectService {
+
   @Transactional(readOnly = true)
   public List<ProjectDto> readProjectList(Crew crew) {
     return crew.getParticipantList()

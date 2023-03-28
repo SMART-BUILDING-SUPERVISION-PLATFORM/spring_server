@@ -12,8 +12,9 @@ import java.util.List;
 @Getter
 public class CrewRes extends CrewDto {
 
-  private CompanyDto company;
-  private List<ProjectDto> projectList;
+  private final CompanyDto company;
+
+  private final List<ProjectDto> projectList;
 
   @Builder
   public CrewRes(

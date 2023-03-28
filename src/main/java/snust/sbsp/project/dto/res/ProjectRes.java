@@ -15,6 +15,7 @@ public class ProjectRes extends ProjectDto {
 
   @JsonIgnore
   private Project project;
+
   private List<ParticipantDto> participantList;
 
   public ProjectRes(

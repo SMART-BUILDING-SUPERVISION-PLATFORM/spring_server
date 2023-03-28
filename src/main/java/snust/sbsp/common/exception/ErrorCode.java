@@ -23,6 +23,8 @@ public enum ErrorCode {
   INTERNAL_SERVER_ERROR(-501, HttpStatus.INTERNAL_SERVER_ERROR, "internal server error.");
 
   private final int code;
+
   private final HttpStatus httpStatus;
+  
   private final String message;
 }

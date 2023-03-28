@@ -5,9 +5,12 @@ import snust.sbsp.company.domain.Company;
 
 @Getter
 public class CompanyDto {
-  private Long id;
-  private String name;
-  private String address;
+
+  private final Long id;
+
+  private final String name;
+
+  private final String address;
 
   public CompanyDto(Company company) {
     this.id = company.getId();

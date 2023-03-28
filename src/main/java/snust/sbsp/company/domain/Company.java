@@ -10,9 +10,9 @@ import java.util.List;
 
 @Getter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Entity(name = "company")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Company {
 
   @Id
@@ -21,7 +21,7 @@ public class Company {
 
   @Column(name = "name")
   private String name;
-  
+
   @Column(name = "address")
   private String address;
 

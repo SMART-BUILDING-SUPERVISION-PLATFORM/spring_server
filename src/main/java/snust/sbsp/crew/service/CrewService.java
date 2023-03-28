@@ -22,12 +22,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CrewService {
+
   private final CompanyService companyService;
+
   private final ProjectService projectService;
+
   private final CrewRepository crewRepository;
 
   @Transactional(readOnly = true)
   public Crew readCrew(String crewEmail) {
+
     return crewRepository.findByEmail(crewEmail)
       .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
   }
@@ -36,6 +40,7 @@ public class CrewService {
   public CrewRes readCrew(Long crewId) {
     Crew crew = crewRepository.findById(crewId)
       .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+
     return CrewRes.builder()
       .crew(crew)
       .company(new CompanyDto(crew.getCompany()))
@@ -43,7 +48,12 @@ public class CrewService {
       .build();
   }
 
-  public List<CrewRes> readCrewList(Long companyId, Boolean isPending, Role role, String name) {
+  public List<CrewRes> readCrewList(
+    Long companyId,
+    Boolean isPending,
+    Role role,
+    String name
+  ) {
     Specification<Crew> specification = ((root, query, criteriaBuilder) -> null);
     if (name != null)
       specification = specification.and(CrewSpecification.equalName(name));
@@ -55,16 +65,17 @@ public class CrewService {
       Company company = companyService.findById(companyId);
       specification = specification.and(CrewSpecification.equalCompany(company));
     }
+
     List<Crew> crewList = crewRepository.findAll(specification);
+
     return crewList
       .stream()
-      .map(
-        crew ->
-          CrewRes
-            .builder()
-            .crew(crew)
-            .company(new CompanyDto(crew.getCompany()))
-            .build()
+      .map(crew ->
+        CrewRes
+          .builder()
+          .crew(crew)
+          .company(new CompanyDto(crew.getCompany()))
+          .build()
       ).collect(Collectors.toList());
   }
 }

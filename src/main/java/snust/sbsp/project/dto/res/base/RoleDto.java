@@ -5,7 +5,9 @@ import snust.sbsp.project.domain.type.Role;
 
 @Getter
 public class RoleDto {
+
   private final Role attr;
+
   private final String value;
 
   public RoleDto(Role role) {

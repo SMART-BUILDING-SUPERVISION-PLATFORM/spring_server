@@ -16,7 +16,9 @@ public class CompanyRes extends CompanyDto {
 
   @JsonIgnore
   private Company company;
+
   private List<CrewDto> crewList;
+
   private List<ProjectDto> projectList;
 
   public CompanyRes(

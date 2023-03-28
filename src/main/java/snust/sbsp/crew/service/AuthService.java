@@ -28,7 +28,6 @@ public class AuthService {
 
   @Transactional
   public void signUp(SignUpReq signupReq) {
-
     Long companyId = signupReq.getCompanyId();
     Company company = companyService.findById(companyId);
 
@@ -46,6 +45,7 @@ public class AuthService {
       .role(selectRole(signupReq.getBusinessType()))
       .isPending(true)
       .build();
+
     crewRepository.save(crew);
   }
 
@@ -76,6 +76,7 @@ public class AuthService {
   @Transactional(readOnly = true)
   private boolean isAdminPresent(SignUpReq signUpReq) {
     Company company = companyService.findById(signUpReq.getCompanyId());
+
     return company.getCrewList()
       .stream()
       .anyMatch(crew -> crew.getRole().equals(Role.COMPANY_ADMIN));
@@ -95,6 +96,7 @@ public class AuthService {
       crewRole = Role.DESIGN;
     else
       throw new CustomCommonException(ErrorCode.BUSINESS_TYPE_INVALID);
+    
     return crewRole;
   }
 }

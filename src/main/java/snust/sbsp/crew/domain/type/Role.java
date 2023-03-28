@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Role {
+  
   SERVICE_ADMIN("서비스 관리자"),
   COMPANY_ADMIN("관리자"),
   ORDER("발주처"),

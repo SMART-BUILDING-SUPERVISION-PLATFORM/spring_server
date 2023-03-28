@@ -36,7 +36,9 @@ public class Response<T> {
   @Getter
   @AllArgsConstructor
   static class ErrorResponse {
+
     private final int code;
+    
     private final String message;
 
     ErrorResponse(CustomCommonException e) {

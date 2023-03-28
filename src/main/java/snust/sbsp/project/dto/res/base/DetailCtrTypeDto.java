@@ -5,7 +5,9 @@ import snust.sbsp.project.domain.type.DetailCtrType;
 
 @Getter
 public class DetailCtrTypeDto {
+
   private final DetailCtrType attr;
+  
   private final String value;
 
   public DetailCtrTypeDto(DetailCtrType detailCtrType) {

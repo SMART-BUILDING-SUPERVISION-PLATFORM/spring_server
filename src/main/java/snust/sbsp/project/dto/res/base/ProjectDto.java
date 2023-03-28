@@ -7,12 +7,19 @@ import java.time.LocalDate;
 
 @Getter
 public class ProjectDto {
+
   private final Long id;
+
   private final String name;
+
   private final LocalDate startDate;
+
   private final LocalDate endDate;
+
   private final int processRate;
+
   private final String thumbnailUrl;
+
   private final String floorUrl;
 
   public ProjectDto(Project project) {

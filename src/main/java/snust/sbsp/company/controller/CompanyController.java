@@ -14,19 +14,18 @@ import snust.sbsp.company.service.CompanyService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/company")
 @RequiredArgsConstructor
+@RequestMapping("/api/company")
 public class CompanyController {
 
   private final CompanyService companyService;
 
   @GetMapping
-  public ResponseEntity<List<CompanyRes>> validateCompany(
+  public ResponseEntity<List<CompanyRes>> getCompanyList(
     @RequestParam("name") String name
   ) {
     List<CompanyRes> companyList = companyService.readCompany(name);
 
     return Response.ok(HttpStatus.OK, companyList);
   }
-
 }

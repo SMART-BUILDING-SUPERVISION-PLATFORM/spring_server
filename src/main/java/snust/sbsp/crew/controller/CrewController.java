@@ -12,9 +12,10 @@ import snust.sbsp.crew.service.CrewService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/crew")
 @RequiredArgsConstructor
+@RequestMapping("/api/crew")
 public class CrewController {
+
   private final CrewService crewService;
 
   @GetMapping("/{id}")
@@ -22,6 +23,7 @@ public class CrewController {
     @PathVariable("id") Long id
   ) {
     CrewRes crew = crewService.readCrew(id);
+
     return Response.ok(HttpStatus.OK, crew);
   }
 
@@ -33,6 +35,7 @@ public class CrewController {
     @RequestParam(required = false, value = "name") String name
   ) {
     List<CrewRes> crewList = crewService.readCrewList(companyId, isPending, role, name);
+    
     return Response.ok(HttpStatus.OK, crewList);
   }
 }

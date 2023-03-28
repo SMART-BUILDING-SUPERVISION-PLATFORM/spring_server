@@ -5,7 +5,9 @@ import snust.sbsp.project.domain.type.CtrType;
 
 @Getter
 public class CtrTypeDto {
+
   private final CtrType attr;
+
   private final String value;
 
   public CtrTypeDto(CtrType ctrType) {

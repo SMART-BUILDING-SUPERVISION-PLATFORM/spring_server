@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Role {
+
   MANAGER("매니저"),
   EDITABLE("edit"),
   READABLE("read only");

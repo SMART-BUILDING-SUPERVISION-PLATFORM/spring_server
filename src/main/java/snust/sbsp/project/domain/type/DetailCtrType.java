@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum DetailCtrType {
+
   LIV("주거용 건축물"),
   OFC("사무실용 건축물"),
   CMR("상업용 건축물"),
@@ -13,5 +14,6 @@ public enum DetailCtrType {
   HSP("병원"),
   SCH("학교"),
   ETC("기타");
+  
   private final String value;
 }

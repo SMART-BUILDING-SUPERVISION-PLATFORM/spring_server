@@ -17,8 +17,8 @@ import snust.sbsp.crew.service.AuthService;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/crew/auth")
 @RequiredArgsConstructor
+@RequestMapping("/api/crew/auth")
 public class AuthController {
 
   private final EmailUtil emailUtil;
