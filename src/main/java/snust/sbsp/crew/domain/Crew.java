@@ -32,9 +32,6 @@ public class Crew {
   @Column(name = "phone")
   private String phone;
 
-  @Column(name = "business_type")
-  private String businessType;
-
   @Column(name = "role")
   @Enumerated(value = EnumType.STRING)
   private Role role;
