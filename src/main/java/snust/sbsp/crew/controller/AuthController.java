@@ -9,6 +9,7 @@ import snust.sbsp.common.res.Response;
 import snust.sbsp.common.util.EmailUtil;
 import snust.sbsp.common.util.SessionUtil;
 import snust.sbsp.crew.domain.Crew;
+import snust.sbsp.crew.dto.req.CodeValidationReq;
 import snust.sbsp.crew.dto.req.EmailValidationReq;
 import snust.sbsp.crew.dto.req.SignInReq;
 import snust.sbsp.crew.dto.req.SignUpReq;
@@ -71,9 +72,9 @@ public class AuthController {
 
   @PostMapping("/validate-code")
   public ResponseEntity<?> validateCode(
-    @RequestBody EmailValidationReq emailValidationReq
+    @RequestBody CodeValidationReq codeValidationReq
   ) {
-    emailUtil.isValidateCode(emailValidationReq);
+    emailUtil.isValidateCode(codeValidationReq);
 
     return Response.ok(HttpStatus.OK);
   }
