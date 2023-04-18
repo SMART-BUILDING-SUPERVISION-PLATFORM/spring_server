@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
 import snust.sbsp.common.util.CryptoUtil;
+import snust.sbsp.common.util.RedisUtil;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.company.service.CompanyService;
 import snust.sbsp.crew.domain.Crew;
@@ -25,6 +26,8 @@ public class AuthService {
   private final CrewService crewService;
 
   private final CryptoUtil cryptoUtil;
+
+  private final RedisUtil redisUtil;
 
   @Transactional
   public void signUp(SignUpReq signupReq) {
@@ -47,6 +50,8 @@ public class AuthService {
       .build();
 
     crewRepository.save(crew);
+
+    redisUtil.deleteData(signupReq.getEmail());
   }
 
   @Transactional(readOnly = true)
