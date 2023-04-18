@@ -5,16 +5,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import snust.sbsp.common.res.Response;
+import snust.sbsp.common.util.SessionUtil;
 import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.dto.res.CrewRes;
 import snust.sbsp.crew.service.CrewService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/crew")
 public class CrewController {
+  private final SessionUtil sessionUtil;
 
   private final CrewService crewService;
 
@@ -27,15 +30,36 @@ public class CrewController {
     return Response.ok(HttpStatus.OK, crew);
   }
 
-  @GetMapping
-  public ResponseEntity<List<CrewRes>> getCrewList(
+  @GetMapping("/admin-all")
+  public ResponseEntity<List<CrewRes>> getReadOnlyCrewList(
+    @CookieValue(
+      value = "JSESSIONID"
+    ) String jSessionId,
+    HttpServletRequest request,
     @RequestParam(required = false, value = "companyId") Long companyId,
     @RequestParam(required = false, value = "isPending") Boolean isPending,
     @RequestParam(required = false, value = "role") Role role,
     @RequestParam(required = false, value = "name") String name
   ) {
-    List<CrewRes> crewList = crewService.readCrewList(companyId, isPending, role, name);
-    
+    Long crewId = sessionUtil.getInfo(jSessionId, request);
+    List<CrewRes> crewList = crewService.getAllCrewList(crewId, companyId, isPending, role, name);
+
+    return Response.ok(HttpStatus.OK, crewList);
+  }
+
+  @GetMapping("/admin-ca/toggleable") // specific
+  public ResponseEntity<List<CrewRes>> getToggleableCrewList(
+    @CookieValue(
+      value = "JSESSIONID"
+    ) String jSessionId,
+    HttpServletRequest request,
+    @RequestParam(required = false, value = "isPending") Boolean isPending,
+    @RequestParam(required = false, value = "role") Role role,
+    @RequestParam(required = false, value = "name") String name
+  ) {
+    Long crewId = sessionUtil.getInfo(jSessionId, request);
+    List<CrewRes> crewList = crewService.readCompanyCrewList(crewId, isPending, role, name);
+
     return Response.ok(HttpStatus.OK, crewList);
   }
 }
