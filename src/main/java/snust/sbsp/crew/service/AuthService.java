@@ -96,7 +96,7 @@ public class AuthService {
       crewRole = Role.DESIGN;
     else
       throw new CustomCommonException(ErrorCode.BUSINESS_TYPE_INVALID);
-    
+
     return crewRole;
   }
 }
