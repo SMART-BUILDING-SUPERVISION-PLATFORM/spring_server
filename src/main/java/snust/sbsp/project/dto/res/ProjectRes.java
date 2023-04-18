@@ -1,6 +1,7 @@
 package snust.sbsp.project.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import snust.sbsp.project.domain.Project;
@@ -16,6 +17,7 @@ public class ProjectRes extends ProjectDto {
   @JsonIgnore
   private Project project;
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<ParticipantDto> participantList;
 
   public ProjectRes(

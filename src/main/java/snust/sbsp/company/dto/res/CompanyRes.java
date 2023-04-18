@@ -1,6 +1,7 @@
 package snust.sbsp.company.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import snust.sbsp.company.domain.Company;
@@ -17,8 +18,10 @@ public class CompanyRes extends CompanyDto {
   @JsonIgnore
   private Company company;
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<CrewDto> crewList;
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<ProjectDto> projectList;
 
   public CompanyRes(
