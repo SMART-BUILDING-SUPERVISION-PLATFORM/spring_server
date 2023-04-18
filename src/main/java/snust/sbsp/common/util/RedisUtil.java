@@ -22,10 +22,11 @@ public class RedisUtil {
 
   public void setDataExpire(
     String key,
-    String value
+    String value,
+    long min
   ) {
 
-    long duration = 60 * 3L;
+    long duration = 60 * min;
 
     ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
     Duration expireDuration = Duration.ofSeconds(duration);

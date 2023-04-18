@@ -7,7 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
-import snust.sbsp.crew.dto.req.EmailValidationReq;
+import snust.sbsp.crew.dto.req.CodeValidationReq;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -91,23 +91,23 @@ public class EmailUtil {
       if (redisUtil.getData(to) != null)
         redisUtil.deleteData(to);
 
-      redisUtil.setDataExpire(to, code);
+      redisUtil.setDataExpire(to, code, 3);
       javaMailSender.send(message);
     } catch (Exception e) {
       throw new CustomCommonException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
   }
 
-  public void isValidateCode(EmailValidationReq request) {
-    String email = request.getEmail();
-    String code = request.getCode();
+  public void isValidateCode(CodeValidationReq codeValidationReq) {
+    String email = codeValidationReq.getEmail();
+    String code = codeValidationReq.getCode();
 
     String serverCode = redisUtil.getData(email);
     if (serverCode == null)
       throw new CustomCommonException(ErrorCode.EMAIL_CODE_NOT_FOUND);
 
     if (serverCode.equals(code))
-      redisUtil.deleteData(email);
+      redisUtil.setDataExpire(email, "true", 10);
     else
       throw new CustomCommonException(ErrorCode.EMAIL_CODE_INVALID);
   }
