@@ -18,7 +18,7 @@ public class ProjectRes extends ProjectDto {
   private Project project;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  private List<ParticipantDto> participantList;
+  private final List<ParticipantDto> participantList;
 
   public ProjectRes(
     Project project,

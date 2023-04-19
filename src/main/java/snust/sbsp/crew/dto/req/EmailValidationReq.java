@@ -8,5 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class EmailValidationReq {
 
-  private String email;
+  private final String email;
+  private final String name;
 }

@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CodeValidationReq {
 
-  private String email;
+  private final String email;
 
-  private String code;
+  private final String code;
 }

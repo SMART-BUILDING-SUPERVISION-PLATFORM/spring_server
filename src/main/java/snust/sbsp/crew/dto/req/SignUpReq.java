@@ -7,15 +7,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SignUpReq {
 
-  private Long companyId;
+  private final Long companyId;
 
-  private String email;
+  private final String email;
 
-  private String password;
+  private final String password;
 
-  private String name;
+  private final String name;
 
-  private String number;
+  private final String number;
 
-  private String businessType;
+  private final String businessType;
 }

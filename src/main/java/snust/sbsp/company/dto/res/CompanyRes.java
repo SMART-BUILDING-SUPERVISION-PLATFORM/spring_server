@@ -19,10 +19,10 @@ public class CompanyRes extends CompanyDto {
   private Company company;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  private List<CrewDto> crewList;
+  private final List<CrewDto> crewList;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  private List<ProjectDto> projectList;
+  private final List<ProjectDto> projectList;
 
   public CompanyRes(
     Company company,
