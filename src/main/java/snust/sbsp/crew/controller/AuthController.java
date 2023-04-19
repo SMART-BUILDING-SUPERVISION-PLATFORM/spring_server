@@ -12,6 +12,7 @@ import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.dto.req.CodeValidationReq;
 import snust.sbsp.crew.dto.req.SignInReq;
 import snust.sbsp.crew.dto.req.SignUpReq;
+import snust.sbsp.crew.dto.res.etc.ValidationCodeDto;
 import snust.sbsp.crew.service.AuthService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,11 +70,11 @@ public class AuthController {
   }
 
   @PostMapping("/validate-code")
-  public ResponseEntity<?> validateCode(
+  public ResponseEntity<ValidationCodeDto> validateCode(
     @RequestBody CodeValidationReq codeValidationReq
   ) {
-    emailUtil.isValidateCode(codeValidationReq);
+    String newCode = emailUtil.isValidateCode(codeValidationReq);
 
-    return Response.ok(HttpStatus.OK);
+    return Response.ok(HttpStatus.OK, new ValidationCodeDto(newCode));
   }
 }
