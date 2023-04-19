@@ -125,49 +125,60 @@ public class CrewService {
 
   @Transactional
   public void togglePendingByCa(
-    String jSessionId,
-    HttpServletRequest request,
+    Long companyAdminId,
     Long crewId
   ) {
-    Long requestedCrewId = sessionUtil.getInfo(jSessionId, request);
-    Long requestedCompanyId = readCrew(requestedCrewId).getCompany().getId();
-    Long crewCompanyId = readCrew(crewId).getCompany().getId();
+    Crew companyAdmin = crewRepository.findByIdAndRole(companyAdminId, Role.COMPANY_ADMIN)
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
 
-    String isCaOrSa = isCaOrSa(requestedCrewId);
+    Crew crew = crewRepository.findById(crewId)
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
 
-    if (!isCaOrSa.equals(Role.COMPANY_ADMIN.getValue()) || !requestedCompanyId.equals(crewCompanyId))
+    if (!companyAdmin.getCompany().equals(crew.getCompany())) {
       throw new CustomCommonException(ErrorCode.FORBIDDEN);
+    }
 
-    changeState(crewId);
+    crew.togglePending();
   }
 
   @Transactional
   public void togglePendingBySa(
-    String jSessionId,
-    HttpServletRequest request,
+    Long serviceAdminId,
     Long crewId
   ) {
-    Long requestedCrewId = sessionUtil.getInfo(jSessionId, request);
-    String isCaOrSa = isCaOrSa(requestedCrewId);
+    crewRepository.findByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN)
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
 
-    if (!isCaOrSa.equals(Role.SERVICE_ADMIN.getValue()))
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
-
-    changeState(crewId);
-  }
-
-  private String isCaOrSa(
-    Long crewId
-  ) {
     Crew crew = crewRepository.findById(crewId)
       .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
 
-    return crew.getRole().getValue();
+    crew.togglePending();
   }
 
-  private void changeState(Long crewId) {
+
+  public void deleteCompanyCrew(Long companyAdminId, Long crewId) {
+    Crew companyAdmin = crewRepository.findByIdAndRole(companyAdminId, Role.COMPANY_ADMIN)
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
+
+    Crew crew = crewRepository.findById(crewId)
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+
+    if (!companyAdmin.getCompany().equals(crew.getCompany())) {
+      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+    }
+
+    crewRepository.deleteById(crewId);
+  }
+
+  @Transactional
+  public void deleteCrew(Long serviceAdminId, Long crewId) {
+    crewRepository.findByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN)
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
+
     crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND))
-      .togglePending();
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+
+    crewRepository.deleteById(crewId);
+
   }
 }

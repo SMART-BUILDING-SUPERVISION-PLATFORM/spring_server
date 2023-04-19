@@ -49,7 +49,7 @@ public class AuthService {
       .password(cryptoUtil.encrypt(signupReq.getPassword()))
       .name(signupReq.getName())
       .phone(signupReq.getNumber())
-      .role(selectRole(signupReq.getBusinessType()))
+      .role(Role.from(signupReq.getBusinessType()))
       .isPending(true)
       .build();
 
@@ -83,29 +83,11 @@ public class AuthService {
   }
 
   @Transactional(readOnly = true)
-  private boolean isAdminPresent(SignUpReq signUpReq) {
+  protected boolean isAdminPresent(SignUpReq signUpReq) {
     Company company = companyService.findById(signUpReq.getCompanyId());
 
     return company.getCrewList()
       .stream()
       .anyMatch(crew -> crew.getRole().equals(Role.COMPANY_ADMIN));
-  }
-
-  private Role selectRole(String businessType) {
-    Role crewRole;
-    if (businessType.equals(Role.COMPANY_ADMIN.getValue()))
-      crewRole = Role.COMPANY_ADMIN;
-    else if (businessType.equals(Role.ORDER.getValue()))
-      crewRole = Role.ORDER;
-    else if (businessType.equals(Role.SUPERVISOR.getValue()))
-      crewRole = Role.SUPERVISOR;
-    else if (businessType.equals(Role.CONSTRUCTION.getValue()))
-      crewRole = Role.CONSTRUCTION;
-    else if (businessType.equals(Role.DESIGN.getValue()))
-      crewRole = Role.DESIGN;
-    else
-      throw new CustomCommonException(ErrorCode.BUSINESS_TYPE_INVALID);
-
-    return crewRole;
   }
 }

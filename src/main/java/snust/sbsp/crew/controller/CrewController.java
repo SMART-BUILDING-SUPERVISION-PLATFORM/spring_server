@@ -30,6 +30,34 @@ public class CrewController {
     return Response.ok(HttpStatus.OK, crew);
   }
 
+  @DeleteMapping("/admin-ca/{id}")
+  public ResponseEntity<?> deleteCompanyCrew(
+    @CookieValue(
+      value = "JSESSIONID"
+    ) String jSessionId,
+    HttpServletRequest request,
+    @PathVariable("id") Long id
+  ) {
+    Long companyAdminId = sessionUtil.getInfo(jSessionId, request);
+    crewService.deleteCompanyCrew(companyAdminId, id);
+
+    return Response.ok(HttpStatus.OK);
+  }
+
+  @DeleteMapping("/admin-sa/{id}")
+  public ResponseEntity<?> deleteCrew(
+    @CookieValue(
+      value = "JSESSIONID"
+    ) String jSessionId,
+    HttpServletRequest request,
+    @PathVariable("id") Long id
+  ) {
+    Long serviceAdminId = sessionUtil.getInfo(jSessionId, request);
+    crewService.deleteCrew(serviceAdminId, id);
+
+    return Response.ok(HttpStatus.OK);
+  }
+
   @GetMapping("/admin-all")
   public ResponseEntity<List<CrewRes>> getAllCrewList(
     @CookieValue(
@@ -71,7 +99,8 @@ public class CrewController {
     HttpServletRequest request,
     @PathVariable("id") Long crewId
   ) {
-    crewService.togglePendingByCa(jSessionId, request, crewId);
+    Long companyAdminId = sessionUtil.getInfo(jSessionId, request);
+    crewService.togglePendingByCa(companyAdminId, crewId);
 
     return Response.ok(HttpStatus.OK);
   }
@@ -84,7 +113,8 @@ public class CrewController {
     HttpServletRequest request,
     @PathVariable("id") Long crewId
   ) {
-    crewService.togglePendingBySa(jSessionId, request, crewId);
+    Long serviceAdminId = sessionUtil.getInfo(jSessionId, request);
+    crewService.togglePendingBySa(serviceAdminId, crewId);
 
     return Response.ok(HttpStatus.OK);
   }
