@@ -98,7 +98,7 @@ public class EmailUtil {
     }
   }
 
-  public void isValidateCode(CodeValidationReq codeValidationReq) {
+  public String isValidateCode(CodeValidationReq codeValidationReq) {
     String email = codeValidationReq.getEmail();
     String code = codeValidationReq.getCode();
 
@@ -106,9 +106,11 @@ public class EmailUtil {
     if (serverCode == null)
       throw new CustomCommonException(ErrorCode.EMAIL_CODE_NOT_FOUND);
 
-    if (serverCode.equals(code))
-      redisUtil.setDataExpire(email, "true", 10);
-    else
+    if (serverCode.equals(code)) {
+      String newCode = createCode();
+      redisUtil.setDataExpire(email, newCode, 60);
+      return redisUtil.getData(email);
+    } else
       throw new CustomCommonException(ErrorCode.EMAIL_CODE_INVALID);
   }
 }
