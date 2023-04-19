@@ -10,12 +10,12 @@ import snust.sbsp.common.util.EmailUtil;
 import snust.sbsp.common.util.SessionUtil;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.dto.req.CodeValidationReq;
-import snust.sbsp.crew.dto.req.EmailValidationReq;
 import snust.sbsp.crew.dto.req.SignInReq;
 import snust.sbsp.crew.dto.req.SignUpReq;
 import snust.sbsp.crew.service.AuthService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.websocket.server.PathParam;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,12 +58,10 @@ public class AuthController {
     return Response.ok(HttpStatus.OK);
   }
 
-  @PostMapping("/email-duplication")
+  @GetMapping("/email-duplication")
   public ResponseEntity<?> validateEmail(
-    @RequestBody EmailValidationReq emailValidationReq
+    @PathParam("email") String email
   ) {
-    String email = emailValidationReq.getEmail();
-
     authService.isEmailDuplicated(email);
     emailUtil.sendSimpleMessage(email);
 
