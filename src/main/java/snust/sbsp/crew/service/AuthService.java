@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
 import snust.sbsp.common.util.CryptoUtil;
+import snust.sbsp.common.util.RedisUtil;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.company.service.CompanyService;
 import snust.sbsp.crew.domain.Crew;
@@ -26,10 +27,16 @@ public class AuthService {
 
   private final CryptoUtil cryptoUtil;
 
+  private final RedisUtil redisUtil;
+
   @Transactional
   public void signUp(SignUpReq signupReq) {
     Long companyId = signupReq.getCompanyId();
     Company company = companyService.findById(companyId);
+    String newCode = signupReq.getNewCode();
+
+    if (!newCode.equals(redisUtil.getData(signupReq.getEmail())))
+      throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
     if (signupReq.getBusinessType().equals(Role.COMPANY_ADMIN.getValue()))
       isPossibleToJoin(signupReq);
@@ -42,11 +49,13 @@ public class AuthService {
       .password(cryptoUtil.encrypt(signupReq.getPassword()))
       .name(signupReq.getName())
       .phone(signupReq.getNumber())
-      .role(selectRole(signupReq.getBusinessType()))
+      .role(Role.from(signupReq.getBusinessType()))
       .isPending(true)
       .build();
 
     crewRepository.save(crew);
+
+    redisUtil.deleteData(signupReq.getEmail());
   }
 
   @Transactional(readOnly = true)
@@ -74,29 +83,11 @@ public class AuthService {
   }
 
   @Transactional(readOnly = true)
-  private boolean isAdminPresent(SignUpReq signUpReq) {
+  protected boolean isAdminPresent(SignUpReq signUpReq) {
     Company company = companyService.findById(signUpReq.getCompanyId());
 
     return company.getCrewList()
       .stream()
       .anyMatch(crew -> crew.getRole().equals(Role.COMPANY_ADMIN));
-  }
-
-  private Role selectRole(String businessType) {
-    Role crewRole;
-    if (businessType.equals(Role.COMPANY_ADMIN.getValue()))
-      crewRole = Role.COMPANY_ADMIN;
-    else if (businessType.equals(Role.ORDER.getValue()))
-      crewRole = Role.ORDER;
-    else if (businessType.equals(Role.SUPERVISOR.getValue()))
-      crewRole = Role.SUPERVISOR;
-    else if (businessType.equals(Role.CONSTRUCTION.getValue()))
-      crewRole = Role.CONSTRUCTION;
-    else if (businessType.equals(Role.DESIGN.getValue()))
-      crewRole = Role.DESIGN;
-    else
-      throw new CustomCommonException(ErrorCode.BUSINESS_TYPE_INVALID);
-    
-    return crewRole;
   }
 }

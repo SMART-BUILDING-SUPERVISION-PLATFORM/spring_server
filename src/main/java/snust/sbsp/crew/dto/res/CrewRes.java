@@ -1,5 +1,6 @@
 package snust.sbsp.crew.dto.res;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import snust.sbsp.company.dto.res.base.CompanyDto;
@@ -12,8 +13,9 @@ import java.util.List;
 @Getter
 public class CrewRes extends CrewDto {
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private final CompanyDto company;
-
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   private final List<ProjectDto> projectList;
 
   @Builder

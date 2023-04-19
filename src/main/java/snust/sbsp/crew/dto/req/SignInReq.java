@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SignInReq {
 
-  private String email;
+  private final String email;
 
-  private String password;
+  private final String password;
 }
