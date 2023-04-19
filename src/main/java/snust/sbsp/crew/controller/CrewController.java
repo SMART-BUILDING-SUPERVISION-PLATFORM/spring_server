@@ -31,7 +31,7 @@ public class CrewController {
   }
 
   @GetMapping("/admin-all")
-  public ResponseEntity<List<CrewRes>> getReadOnlyCrewList(
+  public ResponseEntity<List<CrewRes>> getAllCrewList(
     @CookieValue(
       value = "JSESSIONID"
     ) String jSessionId,
@@ -47,8 +47,8 @@ public class CrewController {
     return Response.ok(HttpStatus.OK, crewList);
   }
 
-  @GetMapping("/admin-ca/toggleable") // specific
-  public ResponseEntity<List<CrewRes>> getToggleableCrewList(
+  @GetMapping("/admin-ca")
+  public ResponseEntity<List<CrewRes>> getCompanyCrewList(
     @CookieValue(
       value = "JSESSIONID"
     ) String jSessionId,
@@ -61,5 +61,31 @@ public class CrewController {
     List<CrewRes> crewList = crewService.readCompanyCrewList(crewId, isPending, role, name);
 
     return Response.ok(HttpStatus.OK, crewList);
+  }
+
+  @PutMapping("/admin-ca/{id}")
+  public ResponseEntity<?> togglePendingByCa(
+    @CookieValue(
+      value = "JSESSIONID"
+    ) String jSessionId,
+    HttpServletRequest request,
+    @PathVariable("id") Long crewId
+  ) {
+    crewService.togglePendingByCa(jSessionId, request, crewId);
+
+    return Response.ok(HttpStatus.OK);
+  }
+
+  @PutMapping("/admin-sa/{id}")
+  public ResponseEntity<?> togglePendingBySa(
+    @CookieValue(
+      value = "JSESSIONID"
+    ) String jSessionId,
+    HttpServletRequest request,
+    @PathVariable("id") Long crewId
+  ) {
+    crewService.togglePendingBySa(jSessionId, request, crewId);
+
+    return Response.ok(HttpStatus.OK);
   }
 }

@@ -45,4 +45,8 @@ public class Crew {
 
   @OneToMany(mappedBy = "crew")
   private List<Participant> participantList = new ArrayList<>();
+
+  public void togglePending() {
+    this.isPending = !isPending;
+  }
 }

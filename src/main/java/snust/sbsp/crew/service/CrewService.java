@@ -17,6 +17,7 @@ import snust.sbsp.crew.repository.CrewRepository;
 import snust.sbsp.crew.specification.CrewSpecification;
 import snust.sbsp.project.service.ProjectService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,5 +121,53 @@ public class CrewService {
           .company(new CompanyDto(crew.getCompany()))
           .build()
       ).collect(Collectors.toList());
+  }
+
+  @Transactional
+  public void togglePendingByCa(
+    String jSessionId,
+    HttpServletRequest request,
+    Long crewId
+  ) {
+    Long requestedCrewId = sessionUtil.getInfo(jSessionId, request);
+    Long requestedCompanyId = readCrew(requestedCrewId).getCompany().getId();
+    Long crewCompanyId = readCrew(crewId).getCompany().getId();
+
+    String isCaOrSa = isCaOrSa(requestedCrewId);
+
+    if (!isCaOrSa.equals(Role.COMPANY_ADMIN.getValue()) || !requestedCompanyId.equals(crewCompanyId))
+      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+    changeState(crewId);
+  }
+
+  @Transactional
+  public void togglePendingBySa(
+    String jSessionId,
+    HttpServletRequest request,
+    Long crewId
+  ) {
+    Long requestedCrewId = sessionUtil.getInfo(jSessionId, request);
+    String isCaOrSa = isCaOrSa(requestedCrewId);
+
+    if (!isCaOrSa.equals(Role.SERVICE_ADMIN.getValue()))
+      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+    changeState(crewId);
+  }
+
+  private String isCaOrSa(
+    Long crewId
+  ) {
+    Crew crew = crewRepository.findById(crewId)
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+
+    return crew.getRole().getValue();
+  }
+
+  private void changeState(Long crewId) {
+    crewRepository.findById(crewId)
+      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND))
+      .togglePending();
   }
 }
