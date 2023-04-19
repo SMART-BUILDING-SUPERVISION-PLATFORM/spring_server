@@ -18,4 +18,6 @@ public class SignUpReq {
   private final String number;
 
   private final String businessType;
+
+  private final String newCode;
 }
