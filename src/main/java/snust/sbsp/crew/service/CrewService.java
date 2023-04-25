@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
-import snust.sbsp.common.util.SessionUtil;
-import snust.sbsp.company.domain.Company;
 import snust.sbsp.company.dto.res.base.CompanyDto;
 import snust.sbsp.company.service.CompanyService;
 import snust.sbsp.crew.domain.Crew;
@@ -17,14 +15,12 @@ import snust.sbsp.crew.repository.CrewRepository;
 import snust.sbsp.crew.specification.CrewSpecification;
 import snust.sbsp.project.service.ProjectService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CrewService {
-  private final SessionUtil sessionUtil;
 
   private final CompanyService companyService;
 
@@ -61,7 +57,7 @@ public class CrewService {
     Crew foundCrew = crewRepository.findById(crewId)
       .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
 
-    if (foundCrew.getRole() != Role.COMPANY_ADMIN)
+    if (!foundCrew.getRole().equals(Role.COMPANY_ADMIN))
       throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
     Specification<Crew> specification = ((root, query, criteriaBuilder) -> null);
@@ -71,7 +67,7 @@ public class CrewService {
       specification = specification.and(CrewSpecification.equalRole(role));
     if (isPending != null)
       specification = specification.and(CrewSpecification.equalIsPending(isPending));
-
+    specification = specification.and(CrewSpecification.equalCompany(foundCrew.getCompany()));
     List<Crew> crewList = crewRepository.findAll(specification);
 
     return crewList
@@ -95,7 +91,7 @@ public class CrewService {
     Crew foundCrew = crewRepository.findById(crewId)
       .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
 
-    if (foundCrew.getRole() != Role.COMPANY_ADMIN || foundCrew.getRole() != Role.SERVICE_ADMIN)
+    if (!foundCrew.getRole().equals(Role.COMPANY_ADMIN) && !foundCrew.getRole().equals(Role.SERVICE_ADMIN))
       throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
     Specification<Crew> specification = ((root, query, criteriaBuilder) -> null);
@@ -105,10 +101,8 @@ public class CrewService {
       specification = specification.and(CrewSpecification.equalRole(role));
     if (isPending != null)
       specification = specification.and(CrewSpecification.equalIsPending(isPending));
-    if (companyId != null) {
-      Company company = companyService.findById(companyId);
-      specification = specification.and(CrewSpecification.equalCompany(company));
-    }
+    if (companyId != null)
+      specification = specification.and(CrewSpecification.equalCompany(companyService.findById(companyId)));
 
     List<Crew> crewList = crewRepository.findAll(specification);
 
@@ -134,9 +128,8 @@ public class CrewService {
     Crew crew = crewRepository.findById(crewId)
       .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
 
-    if (!companyAdmin.getCompany().equals(crew.getCompany())) {
+    if (!companyAdmin.getCompany().equals(crew.getCompany()))
       throw new CustomCommonException(ErrorCode.FORBIDDEN);
-    }
 
     crew.togglePending();
   }
@@ -163,9 +156,8 @@ public class CrewService {
     Crew crew = crewRepository.findById(crewId)
       .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
 
-    if (!companyAdmin.getCompany().equals(crew.getCompany())) {
+    if (!companyAdmin.getCompany().equals(crew.getCompany()))
       throw new CustomCommonException(ErrorCode.FORBIDDEN);
-    }
 
     crewRepository.deleteById(crewId);
   }
