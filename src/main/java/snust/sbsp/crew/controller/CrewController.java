@@ -22,9 +22,14 @@ public class CrewController {
   private final CrewService crewService;
 
   @GetMapping("/{id}")
-  public ResponseEntity<CrewRes> getCrewList(
+  public ResponseEntity<CrewRes> getCrew(
+    @CookieValue(
+      value = "JSESSIONID"
+    ) String jSessionId,
+    HttpServletRequest request,
     @PathVariable("id") Long id
   ) {
+    sessionUtil.getInfo(jSessionId, request);
     CrewRes crew = crewService.readCrew(id);
 
     return Response.ok(HttpStatus.OK, crew);
