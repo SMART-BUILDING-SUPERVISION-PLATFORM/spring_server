@@ -79,17 +79,18 @@ public class AuthService {
       throw new CustomCommonException(ErrorCode.EMAIL_DUPLICATED);
   }
 
-  private void isPossibleToJoin(SignUpReq signUpReq) {
-    if (isAdminPresent(signUpReq))
-      throw new CustomCommonException(ErrorCode.COMPANY_HAS_ADMIN);
-  }
-
   @Transactional(readOnly = true)
-  protected boolean isAdminPresent(SignUpReq signUpReq) {
+  private boolean isAdminPresent(SignUpReq signUpReq) {
     Company company = companyService.findById(signUpReq.getCompanyId());
 
     return company.getCrewList()
       .stream()
       .anyMatch(crew -> crew.getRole().equals(Role.COMPANY_ADMIN));
   }
+
+  private void isPossibleToJoin(SignUpReq signUpReq) {
+    if (isAdminPresent(signUpReq))
+      throw new CustomCommonException(ErrorCode.COMPANY_HAS_ADMIN);
+  }
+
 }

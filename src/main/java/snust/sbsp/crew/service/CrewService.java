@@ -43,7 +43,7 @@ public class CrewService {
     return CrewRes.builder()
       .crew(crew)
       .company(new CompanyDto(crew.getCompany()))
-      .projectList(projectService.readProjectList(crew))
+      .projectList(projectService.readMyProjectList(crew.getId()))
       .build();
   }
 
@@ -70,7 +70,6 @@ public class CrewService {
     specification = specification.and(CrewSpecification.equalCompany(foundCrew.getCompany()));
     List<Crew> crewList = crewRepository.findAll(specification);
 
-
     return crewList
       .stream()
       .map(crew ->
@@ -82,6 +81,7 @@ public class CrewService {
       ).collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   public List<CrewRes> getAllCrewList(
     Long crewId,
     Long companyId,
@@ -149,7 +149,7 @@ public class CrewService {
     crew.togglePending();
   }
 
-
+  @Transactional
   public void deleteCompanyCrew(Long companyAdminId, Long crewId) {
     Crew companyAdmin = crewRepository.findByIdAndRole(companyAdminId, Role.COMPANY_ADMIN)
       .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
