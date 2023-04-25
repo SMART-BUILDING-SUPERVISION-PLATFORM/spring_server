@@ -54,12 +54,12 @@ public class SessionUtil {
     String jSessionId,
     HttpServletRequest request
   ) {
-    try {
-      HttpSession session = request.getSession();
+    HttpSession session = request.getSession();
+    Long crewId = (Long) session.getAttribute(jSessionId);
 
-      return (Long) session.getAttribute(jSessionId);
-    } catch (NullPointerException e) {
+    if (crewId == null)
       throw new CustomCommonException(ErrorCode.SESSION_NOT_FOUND);
-    }
+
+    return (Long) session.getAttribute(jSessionId);
   }
 }
