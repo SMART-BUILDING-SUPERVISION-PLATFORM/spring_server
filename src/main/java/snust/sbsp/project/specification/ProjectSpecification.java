@@ -22,8 +22,4 @@ public class ProjectSpecification {
   public static Specification<Project> equalDetailCtrClass(DetailCtrType detailCtrClass) {
     return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("detailCtrClass"), detailCtrClass));
   }
-
-//  public static Specification<Project> isAttendance(Boolean attendance) {
-//    return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("role"), role));
-//  }
 }

@@ -64,8 +64,10 @@ public class AuthService {
     String decryptedPassword = cryptoUtil.decrypt(crew.getPassword());
 
     if (signInReq.getPassword().equals(decryptedPassword)) {
+
       if (crew.isPending())
         throw new CustomCommonException(ErrorCode.PENDING_STATE);
+
       return crew;
     } else
       throw new CustomCommonException(ErrorCode.PASSWORD_INVALID);

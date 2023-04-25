@@ -63,6 +63,7 @@ public class ProjectService {
 
   @Transactional(readOnly = true)
   public List<ProjectDto> readProjectList(Crew crew) {
+    
     return crew.getParticipantList()
       .stream()
       .map(participant -> new ProjectDto(participant.getProject()))

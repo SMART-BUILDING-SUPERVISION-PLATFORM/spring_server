@@ -11,16 +11,26 @@ import snust.sbsp.common.exception.CustomCommonException;
 public class Response<T> {
 
   public static <T> ResponseEntity<T> ok(HttpStatus httpStatus) {
+
     return new ResponseEntity<>(httpStatus);
   }
 
-  public static <T> ResponseEntity<T> ok(HttpStatus httpStatus, T data) {
+  public static <T> ResponseEntity<T> ok(
+    HttpStatus httpStatus,
+    T data
+  ) {
+
     return ResponseEntity
       .status(httpStatus)
       .body(data);
   }
 
-  public static <T> ResponseEntity<T> ok(HttpStatus httpStatus, T data, ResponseCookie responseCookie) {
+  public static <T> ResponseEntity<T> ok(
+    HttpStatus httpStatus,
+    T data,
+    ResponseCookie responseCookie
+  ) {
+
     return ResponseEntity
       .status(httpStatus)
       .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
@@ -28,6 +38,7 @@ public class Response<T> {
   }
 
   public static ResponseEntity<ErrorResponse> fail(CustomCommonException e) {
+
     return ResponseEntity
       .status(e.getHttpStatus())
       .body(new ErrorResponse(e));
@@ -38,7 +49,7 @@ public class Response<T> {
   static class ErrorResponse {
 
     private final int code;
-    
+
     private final String message;
 
     ErrorResponse(CustomCommonException e) {

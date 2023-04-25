@@ -70,6 +70,7 @@ public class CrewService {
     specification = specification.and(CrewSpecification.equalCompany(foundCrew.getCompany()));
     List<Crew> crewList = crewRepository.findAll(specification);
 
+
     return crewList
       .stream()
       .map(crew ->
@@ -171,6 +172,5 @@ public class CrewService {
       .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
 
     crewRepository.deleteById(crewId);
-
   }
 }

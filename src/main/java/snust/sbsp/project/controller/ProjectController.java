@@ -47,9 +47,10 @@ public class ProjectController {
     @PathParam("name") String name,
     @PathParam("ctrClass") String ctrClass,
     @PathParam("detailCtrClass") String detailCtrClass,
-    @PathParam("attendance") Boolean attendance
+    @PathParam("only-me") String onlyMe
   ) {
 
+    System.out.println(onlyMe);
     return Response.ok(HttpStatus.OK);
   }
 }

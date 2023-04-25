@@ -34,10 +34,10 @@ public class SessionUtil {
     Crew crew,
     HttpServletRequest request
   ) {
-
     HttpSession session = request.getSession();
     String sessionId = session.getId();
     session.setAttribute(sessionId, crew.getId());
+    
     return sessionId;
   }
 
@@ -45,7 +45,6 @@ public class SessionUtil {
     String jSessionId,
     HttpServletRequest request
   ) {
-
     HttpSession session = request.getSession();
     session.removeAttribute(jSessionId);
   }
