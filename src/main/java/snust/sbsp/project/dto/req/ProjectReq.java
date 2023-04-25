@@ -2,26 +2,28 @@ package snust.sbsp.project.dto.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class ProjectReq {
 
-  private final Long companyId;
+  private Long companyId;
 
-  private final String name;
+  private String name;
 
-  private final LocalDate startDate;
+  private LocalDate startDate;
 
-  private final LocalDate endDate;
+  private LocalDate endDate;
 
-  private final String ctrType;
+  private String ctrType;
 
-  private final String detailCtrType;
+  private String detailCtrType;
 
-  private final String thumbnailUrl;
+  private String thumbnailUrl;
 
-  private final String floorPlanUrl;
+  private String floorPlanUrl;
 }
