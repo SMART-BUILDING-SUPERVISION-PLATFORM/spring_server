@@ -21,5 +21,5 @@ public class SignUpReq {
 
   private String businessType;
 
-  private String newCode;
+  private String validationCode;
 }
