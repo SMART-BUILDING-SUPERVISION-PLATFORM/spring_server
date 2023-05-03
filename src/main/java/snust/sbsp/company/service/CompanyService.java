@@ -20,14 +20,19 @@ public class CompanyService {
 
   @Transactional(readOnly = true)
   public List<CompanyRes> readCompany(String companyName) {
-    List<Company> companyList = companyRepository.findAll()
-      .stream()
-      .filter(company ->
-        company
-          .getName()
-          .toLowerCase()
-          .contains(companyName.toLowerCase())
-      ).collect(Collectors.toList());
+    List<Company> companyList = companyRepository.findAll();
+
+    if (companyName != null) {
+      companyList =
+        companyList
+          .stream()
+          .filter(company ->
+            company
+              .getName()
+              .toLowerCase()
+              .contains(companyName.toLowerCase())
+          ).collect(Collectors.toList());
+    }
 
     return companyList
       .stream()
