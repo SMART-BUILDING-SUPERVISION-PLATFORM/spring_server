@@ -33,7 +33,7 @@ public class AuthService {
   public void signUp(SignUpReq signupReq) {
     Long companyId = signupReq.getCompanyId();
     Company company = companyService.findById(companyId);
-    String newCode = signupReq.getNewCode();
+    String newCode = signupReq.getValidationCode();
 
     if (!newCode.equals(redisUtil.getData(signupReq.getEmail())))
       throw new CustomCommonException(ErrorCode.FORBIDDEN);
