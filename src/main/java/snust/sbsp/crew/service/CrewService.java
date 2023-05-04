@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CrewService {
 
-    private final CompanyService companyService;
-
     private final CrewRepository crewRepository;
 
     private final CrewSpecification crewSpecification;
@@ -35,9 +33,16 @@ public class CrewService {
                 .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     public Crew readCrewById(Long crewId) {
         return crewRepository.findById(crewId)
                 .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public Crew readCrewByIdAndRole(Long crewId, Role role) {
+        return crewRepository.findByIdAndRole(crewId, role)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
     }
 
     public CrewRes readCrewInformation(Long crewId) {
@@ -108,11 +113,9 @@ public class CrewService {
             Long companyAdminId,
             Long crewId
     ) {
-        Crew companyAdmin = crewRepository.findByIdAndRole(companyAdminId, Role.COMPANY_ADMIN)
-                .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
+        Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
 
-        Crew crew = crewRepository.findById(crewId)
-                .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+        Crew crew = readCrewById(crewId);
 
         if (!companyAdmin.getCompany().equals(crew.getCompany()))
             throw new CustomCommonException(ErrorCode.FORBIDDEN);
@@ -125,8 +128,7 @@ public class CrewService {
             Long serviceAdminId,
             Long crewId
     ) {
-        crewRepository.findByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN)
-                .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
+        readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
 
         Crew crew = readCrewById(crewId);
 
@@ -135,8 +137,7 @@ public class CrewService {
 
     @Transactional
     public void deleteCompanyCrew(Long companyAdminId, Long crewId) {
-        Crew companyAdmin = crewRepository.findByIdAndRole(companyAdminId, Role.COMPANY_ADMIN)
-                .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
+        Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
 
         Crew crew = readCrewById(crewId);
 
@@ -148,8 +149,7 @@ public class CrewService {
 
     @Transactional
     public void deleteCrew(Long serviceAdminId, Long crewId) {
-        crewRepository.findByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN)
-                .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
+        readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
 
         readCrewById(crewId);
 
