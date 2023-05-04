@@ -28,75 +28,81 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectService {
 
-  private final ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-  private final CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
 
-  private final CrewService crewService;
+    private final CrewService crewService;
 
-  @Transactional
-  public void createProject(
-    ProjectReq projectReq,
-    Long crewId
-  ) {
-    Crew crew = crewService.readCrewById(crewId);
+    @Transactional
+    public void createProject(
+            ProjectReq projectReq,
+            Long crewId
+    ) {
+        Crew crew = crewService.readCrewById(crewId);
 
-    Role role = crew.getRole();
-    if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        Role role = crew.getRole();
+        if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-    Company company = role.equals(Role.COMPANY_ADMIN)
-      ? crew.getCompany()
-      : companyRepository.findById(projectReq.getCompanyId())
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
+        Company company = role.equals(Role.COMPANY_ADMIN)
+                ? crew.getCompany()
+                : companyRepository.findById(projectReq.getCompanyId())
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
 
-    Project project = Project.builder()
-      .name(projectReq.getName())
-      .startDate(projectReq.getStartDate())
-      .endDate(projectReq.getEndDate())
-      .ctrType(CtrType.from(projectReq.getCtrType()))
-      .detailCtrType(DetailCtrType.from(projectReq.getDetailCtrType()))
-      .thumbnailUrl(projectReq.getThumbnailUrl())
-      .floorUrl(projectReq.getFloorPlanUrl())
-      .company(company)
-      .build();
+        Project project = Project.builder()
+                .name(projectReq.getName())
+                .startDate(projectReq.getStartDate())
+                .endDate(projectReq.getEndDate())
+                .ctrType(CtrType.from(projectReq.getCtrType()))
+                .detailCtrType(DetailCtrType.from(projectReq.getDetailCtrType()))
+                .thumbnailUrl(projectReq.getThumbnailUrl())
+                .floorUrl(projectReq.getFloorPlanUrl())
+                .company(company)
+                .build();
 
-    projectRepository.save(project);
-  }
-
-  @Transactional(readOnly = true)
-  public List<ProjectDto> readAllProjectList(
-    Long companyId,
-    String name,
-    String ctrClass,
-    String detailCtrClass
-  ) {
-    Specification<Project> specification = ((root, query, criteriaBuilder) -> null);
-    if (name != null)
-      specification = specification.and(ProjectSpecification.equalName(name));
-    if (ctrClass != null)
-      specification = specification.and(ProjectSpecification.equalCtrClass(CtrType.from(ctrClass)));
-    if (detailCtrClass != null)
-      specification = specification.and(ProjectSpecification.equalDetailCtrClass(DetailCtrType.from(detailCtrClass)));
-    if (companyId != null) {
-      Company company = companyRepository.findById(companyId)
-        .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
-      specification = specification.and(ProjectSpecification.equalCompany(company));
+        projectRepository.save(project);
     }
 
-    return projectRepository.findAll(specification)
-      .stream()
-      .map((ProjectDto::new))
-      .collect(Collectors.toList());
-  }
+    @Transactional(readOnly = true)
+    public List<ProjectDto> readExceptMyProjectList(
+            Long currentCrewId,
+            Long companyId,
+            String name,
+            String ctrClass,
+            String detailCtrClass
+    ) {
+        Specification<Project> specification = ((root, query, criteriaBuilder) -> null);
+        if (name != null)
+            specification = specification.and(ProjectSpecification.equalName(name));
+        if (ctrClass != null)
+            specification = specification.and(ProjectSpecification.equalCtrClass(CtrType.from(ctrClass)));
+        if (detailCtrClass != null)
+            specification = specification.and(ProjectSpecification.equalDetailCtrClass(DetailCtrType.from(detailCtrClass)));
+        if (companyId != null) {
+            Company company = companyRepository.findById(companyId)
+                    .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
+            specification = specification.and(ProjectSpecification.equalCompany(company));
+        }
 
-  @Transactional(readOnly = true)
-  public List<ProjectDto> readMyProjectList(Long crewId) {
-    Crew foundedCrew = crewService.readCrewById(crewId);
+        List<ProjectDto> allProjectList = projectRepository.findAll(specification)
+                .stream()
+                .map((ProjectDto::new))
+                .collect(Collectors.toList());
 
-    return foundedCrew.getParticipantList()
-      .stream()
-      .map((participant -> new ProjectDto(participant.getProject())))
-      .collect(Collectors.toList());
-  }
+        List<ProjectDto> myProjectList = readMyProjectList(currentCrewId);
+
+        allProjectList.removeAll(myProjectList);
+        return allProjectList;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectDto> readMyProjectList(Long crewId) {
+        Crew foundedCrew = crewService.readCrewById(crewId);
+
+        return foundedCrew.getParticipantList()
+                .stream()
+                .map((participant -> new ProjectDto(participant.getProject())))
+                .collect(Collectors.toList());
+    }
 }
