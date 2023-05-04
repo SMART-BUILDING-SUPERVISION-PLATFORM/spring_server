@@ -15,23 +15,23 @@ import java.util.List;
 @Builder
 public class CompanyRes extends CompanyDto {
 
-  @JsonIgnore
-  private Company company;
+    @JsonIgnore
+    private Company company;
 
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private final List<CrewDto> crewList;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final List<CrewDto> crewList;
 
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private final List<ProjectDto> projectList;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final List<ProjectDto> projectList;
 
-  public CompanyRes(
-    Company company,
-    List<CrewDto> crewList,
-    List<ProjectDto> projectList
-  ) {
-    super(company);
-    this.crewList = crewList;
-    this.projectList = projectList;
-  }
+    public CompanyRes(
+            Company company,
+            List<CrewDto> crewList,
+            List<ProjectDto> projectList
+    ) {
+        super(company);
+        this.crewList = crewList;
+        this.projectList = projectList;
+    }
 }
 

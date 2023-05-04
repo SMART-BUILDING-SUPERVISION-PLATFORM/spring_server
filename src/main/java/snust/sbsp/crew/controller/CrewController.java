@@ -23,7 +23,7 @@ public class CrewController {
   public ResponseEntity<CrewRes> getInformation(
     @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId
   ) {
-    CrewRes crew = crewService.readCrew(currentCrewId);
+    CrewRes crew = crewService.readCrewInformation(currentCrewId);
 
     return Response.ok(HttpStatus.OK, crew);
   }
@@ -32,7 +32,7 @@ public class CrewController {
   public ResponseEntity<CrewRes> getCrew(
     @PathVariable("id") Long id
   ) {
-    CrewRes crew = crewService.readCrew(id);
+    CrewRes crew = crewService.readCrewInformation(id);
 
     return Response.ok(HttpStatus.OK, crew);
   }

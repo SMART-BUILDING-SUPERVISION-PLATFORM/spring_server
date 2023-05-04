@@ -3,11 +3,14 @@ package snust.sbsp.crew.domain;
 import lombok.*;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.crew.domain.type.Role;
+import snust.sbsp.crew.dto.res.CrewRes;
 import snust.sbsp.project.domain.Participant;
+import snust.sbsp.project.dto.res.base.ProjectDto;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -48,5 +51,9 @@ public class Crew {
 
   public void togglePending() {
     this.isPending = !isPending;
+  }
+
+  public List<ProjectDto> getProjectDtoList() {
+    return participantList.stream().map(p -> new ProjectDto(p.getProject())).collect(Collectors.toList());
   }
 }

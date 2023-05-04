@@ -1,6 +1,7 @@
 package snust.sbsp.company.domain;
 
 import lombok.*;
+import snust.sbsp.company.dto.res.base.CompanyDto;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.project.domain.Project;
 
@@ -30,4 +31,8 @@ public class Company {
 
   @OneToMany(mappedBy = "company")
   private List<Project> projectList = new ArrayList<>();
+
+  public CompanyDto toDto() {
+    return new CompanyDto(this);
+  }
 }

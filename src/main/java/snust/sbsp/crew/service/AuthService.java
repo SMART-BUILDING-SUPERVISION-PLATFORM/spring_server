@@ -60,7 +60,7 @@ public class AuthService {
 
   @Transactional(readOnly = true)
   public Crew validateCrew(SignInReq signInReq) {
-    Crew crew = crewService.readCrew(signInReq.getEmail());
+    Crew crew = crewService.readCrewByEmail(signInReq.getEmail());
     String decryptedPassword = cryptoUtil.decrypt(crew.getPassword());
 
     if (signInReq.getPassword().equals(decryptedPassword)) {

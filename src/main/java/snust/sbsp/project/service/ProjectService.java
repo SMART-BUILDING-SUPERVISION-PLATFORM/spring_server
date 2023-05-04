@@ -11,6 +11,7 @@ import snust.sbsp.company.repository.CompanyRepository;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.repository.CrewRepository;
+import snust.sbsp.crew.service.CrewService;
 import snust.sbsp.project.domain.Project;
 import snust.sbsp.project.domain.type.CtrType;
 import snust.sbsp.project.domain.type.DetailCtrType;
@@ -29,19 +30,16 @@ public class ProjectService {
 
   private final ProjectRepository projectRepository;
 
-  private final ParticipantRepository participantRepository;
-
   private final CompanyRepository companyRepository;
 
-  private final CrewRepository crewRepository;
+  private final CrewService crewService;
 
   @Transactional
   public void createProject(
     ProjectReq projectReq,
     Long crewId
   ) {
-    Crew crew = crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+    Crew crew = crewService.readCrewById(crewId);
 
     Role role = crew.getRole();
     if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
@@ -94,8 +92,7 @@ public class ProjectService {
 
   @Transactional(readOnly = true)
   public List<ProjectDto> readMyProjectList(Long crewId) {
-    Crew foundedCrew = crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+    Crew foundedCrew = crewService.readCrewById(crewId);
 
     return foundedCrew.getParticipantList()
       .stream()
