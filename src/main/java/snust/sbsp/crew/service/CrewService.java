@@ -61,10 +61,7 @@ public class CrewService {
             Role role,
             String name
     ) {
-        Crew foundCrew = readCrewById(crewId);
-
-        if (!foundCrew.getRole().equals(Role.COMPANY_ADMIN))
-            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        readCrewByIdAndRole(crewId, Role.COMPANY_ADMIN);
 
         Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, null);
         List<Crew> crewList = crewRepository.findAll(specification);
