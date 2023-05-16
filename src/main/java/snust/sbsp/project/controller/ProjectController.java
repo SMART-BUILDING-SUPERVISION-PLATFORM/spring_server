@@ -59,4 +59,14 @@ public class ProjectController {
 
         return Response.ok(HttpStatus.OK);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProject(
+            @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+            @PathVariable("id") Long id
+    ) {
+        projectService.deleteProject(id, currentCrewId);
+
+        return Response.ok(HttpStatus.OK);
+    }
 }

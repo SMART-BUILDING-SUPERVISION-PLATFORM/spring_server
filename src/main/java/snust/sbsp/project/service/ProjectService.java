@@ -131,6 +131,28 @@ public class ProjectService {
         project.update(company, projectReq);
     }
 
+    @Transactional
+    public void deleteProject(
+            Long projectId,
+            Long crewId
+    ) {
+        Crew crew = crewService.readCrewById(crewId);
+
+        Role role = crew.getRole();
+        if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+        readProjectById(projectId);
+
+        Participant participant = readParticipantByCrewIdAndProjectIdAnd(crewId, projectId);
+        snust.sbsp.project.domain.type.Role participantRole = participant.getRole();
+        if (!participantRole.equals(snust.sbsp.project.domain.type.Role.MANAGER)) {
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        }
+
+        projectRepository.deleteById(projectId);
+    }
+
     @Transactional(readOnly = true)
     public Project readProjectById(Long projectId) {
         return projectRepository.findById(projectId)
