@@ -19,134 +19,133 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CrewService {
 
-  private final CrewRepository crewRepository;
+    private final CrewRepository crewRepository;
 
-  private final CrewSpecification crewSpecification;
+    private final CrewSpecification crewSpecification;
 
-  @Transactional(readOnly = true)
-  public Crew readCrewByEmail(String crewEmail) {
-    return crewRepository.findByEmail(crewEmail)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-  }
+    @Transactional(readOnly = true)
+    public Crew readCrewByEmail(String crewEmail) {
+        return crewRepository.findByEmail(crewEmail)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+    }
 
-  @Transactional(readOnly = true)
-  public Crew readCrewById(Long crewId) {
-    return crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-  }
+    @Transactional(readOnly = true)
+    public Crew readCrewById(Long crewId) {
+        return crewRepository.findById(crewId)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+    }
 
-  @Transactional(readOnly = true)
-  public Crew readCrewByIdAndRole(Long crewId, Role role) {
-    return crewRepository.findByIdAndRole(crewId, role)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
-  }
+    @Transactional(readOnly = true)
+    public Crew readCrewByIdAndRole(Long crewId, Role role) {
+        return crewRepository.findByIdAndRole(crewId, role)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
+    }
 
-  public CrewRes readCrewInformation(Long crewId) {
-    Crew crew = readCrewById(crewId);
-    return CrewRes.builder()
-      .crew(crew)
-      .company(crew.getCompany().toDto())
-      .projectList(crew.getProjectDtoList())
-      .build();
-  }
+    public CrewRes readCrewInformation(Long crewId) {
+        Crew crew = readCrewById(crewId);
+        return CrewRes.builder()
+                .crew(crew)
+                .company(crew.getCompany().toDto())
+                .build();
+    }
 
-  @Transactional(readOnly = true)
-  public List<CrewRes> readCompanyCrewList(
-    Long crewId,
-    Boolean isPending,
-    Role role,
-    String name
-  ) {
-    readCrewByIdAndRole(crewId, Role.COMPANY_ADMIN);
+    @Transactional(readOnly = true)
+    public List<CrewRes> readCompanyCrewList(
+            Long crewId,
+            Boolean isPending,
+            Role role,
+            String name
+    ) {
+        readCrewByIdAndRole(crewId, Role.COMPANY_ADMIN);
 
-    Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, null);
-    List<Crew> crewList = crewRepository.findAll(specification);
+        Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, null);
+        List<Crew> crewList = crewRepository.findAll(specification);
 
-    return crewList
-      .stream()
-      .map(crew ->
-        CrewRes
-          .builder()
-          .crew(crew)
-          .company(crew.getCompany().toDto())
-          .build()
-      ).collect(Collectors.toList());
-  }
+        return crewList
+                .stream()
+                .map(crew ->
+                        CrewRes
+                                .builder()
+                                .crew(crew)
+                                .company(crew.getCompany().toDto())
+                                .build()
+                ).collect(Collectors.toList());
+    }
 
-  @Transactional(readOnly = true)
-  public List<CrewRes> getAllCrewList(
-    Long crewId,
-    Long companyId,
-    Boolean isPending,
-    Role role,
-    String name
-  ) {
-    Crew foundCrew = readCrewById(crewId);
+    @Transactional(readOnly = true)
+    public List<CrewRes> getAllCrewList(
+            Long crewId,
+            Long companyId,
+            Boolean isPending,
+            Role role,
+            String name
+    ) {
+        Crew foundCrew = readCrewById(crewId);
 
-    if (!foundCrew.getRole().equals(Role.COMPANY_ADMIN) && !foundCrew.getRole().equals(Role.SERVICE_ADMIN))
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        if (!foundCrew.getRole().equals(Role.COMPANY_ADMIN) && !foundCrew.getRole().equals(Role.SERVICE_ADMIN))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-    Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, companyId);
+        Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, companyId);
 
-    List<Crew> crewList = crewRepository.findAll(specification);
+        List<Crew> crewList = crewRepository.findAll(specification);
 
-    return crewList
-      .stream()
-      .map(crew ->
-        CrewRes
-          .builder()
-          .crew(crew)
-          .company(crew.getCompany().toDto())
-          .build()
-      ).collect(Collectors.toList());
-  }
+        return crewList
+                .stream()
+                .map(crew ->
+                        CrewRes
+                                .builder()
+                                .crew(crew)
+                                .company(crew.getCompany().toDto())
+                                .build()
+                ).collect(Collectors.toList());
+    }
 
-  @Transactional
-  public void togglePendingByCa(
-    Long companyAdminId,
-    Long crewId
-  ) {
-    Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
+    @Transactional
+    public void togglePendingByCa(
+            Long companyAdminId,
+            Long crewId
+    ) {
+        Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
 
-    Crew crew = readCrewById(crewId);
+        Crew crew = readCrewById(crewId);
 
-    if (!companyAdmin.getCompany().equals(crew.getCompany()))
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        if (!companyAdmin.getCompany().equals(crew.getCompany()))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-    crew.togglePending();
-  }
+        crew.togglePending();
+    }
 
-  @Transactional
-  public void togglePendingBySa(
-    Long serviceAdminId,
-    Long crewId
-  ) {
-    readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
+    @Transactional
+    public void togglePendingBySa(
+            Long serviceAdminId,
+            Long crewId
+    ) {
+        readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
 
-    Crew crew = readCrewById(crewId);
+        Crew crew = readCrewById(crewId);
 
-    crew.togglePending();
-  }
+        crew.togglePending();
+    }
 
-  @Transactional
-  public void deleteCompanyCrew(Long companyAdminId, Long crewId) {
+    @Transactional
+    public void deleteCompanyCrew(Long companyAdminId, Long crewId) {
 //      SA도 되게 바꿔야함
-    Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
+        Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
 
-    Crew crew = readCrewById(crewId);
+        Crew crew = readCrewById(crewId);
 
-    if (!companyAdmin.getCompany().equals(crew.getCompany()))
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        if (!companyAdmin.getCompany().equals(crew.getCompany()))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-    crewRepository.deleteById(crewId);
-  }
+        crewRepository.deleteById(crewId);
+    }
 
-  @Transactional
-  public void deleteCrew(Long serviceAdminId, Long crewId) {
-    readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
+    @Transactional
+    public void deleteCrew(Long serviceAdminId, Long crewId) {
+        readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
 
-    readCrewById(crewId);
+        readCrewById(crewId);
 
-    crewRepository.deleteById(crewId);
-  }
+        crewRepository.deleteById(crewId);
+    }
 }

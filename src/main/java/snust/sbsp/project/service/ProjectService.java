@@ -8,14 +8,17 @@ import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.company.repository.CompanyRepository;
+import snust.sbsp.company.service.CompanyService;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.service.CrewService;
+import snust.sbsp.project.domain.Participant;
 import snust.sbsp.project.domain.Project;
 import snust.sbsp.project.domain.type.CtrType;
 import snust.sbsp.project.domain.type.DetailCtrType;
 import snust.sbsp.project.dto.req.ProjectReq;
 import snust.sbsp.project.dto.res.base.ProjectDto;
+import snust.sbsp.project.repository.ParticipantRepository;
 import snust.sbsp.project.repository.ProjectRepository;
 import snust.sbsp.project.specification.ProjectSpecification;
 
@@ -26,82 +29,117 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectService {
 
-  private final ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-  private final CompanyRepository companyRepository;
+    private final ParticipantRepository participantRepository;
 
-  private final CrewService crewService;
+    private final CompanyService companyService;
 
-  @Transactional
-  public void createProject(
-    ProjectReq projectReq,
-    Long crewId
-  ) {
-    Crew crew = crewService.readCrewById(crewId);
+    private final CrewService crewService;
 
-    Role role = crew.getRole();
-    if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+    @Transactional
+    public void createProject(
+            ProjectReq projectReq,
+            Long crewId
+    ) {
+        Crew crew = crewService.readCrewById(crewId);
 
-    Company company = role.equals(Role.COMPANY_ADMIN)
-      ? crew.getCompany()
-      : companyRepository.findById(projectReq.getCompanyId())
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
+        Role role = crew.getRole();
+        if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-    Project project = Project.builder()
-      .name(projectReq.getName())
-      .startDate(projectReq.getStartDate())
-      .endDate(projectReq.getEndDate())
-      .ctrType(CtrType.from(projectReq.getCtrType()))
-      .detailCtrType(DetailCtrType.from(projectReq.getDetailCtrType()))
-      .thumbnailUrl(projectReq.getThumbnailUrl())
-      .floorUrl(projectReq.getFloorPlanUrl())
-      .company(company)
-      .build();
+        Company company = role.equals(Role.COMPANY_ADMIN)
+                ? crew.getCompany()
+                : companyService.findById(projectReq.getCompanyId());
 
-    projectRepository.save(project);
-  }
+        Project project = Project.builder()
+                .name(projectReq.getName())
+                .startDate(projectReq.getStartDate())
+                .endDate(projectReq.getEndDate())
+                .ctrType(CtrType.from(projectReq.getCtrType()))
+                .detailCtrType(DetailCtrType.from(projectReq.getDetailCtrType()))
+                .thumbnailUrl(projectReq.getThumbnailUrl())
+                .floorUrl(projectReq.getFloorPlanUrl())
+                .company(company)
+                .build();
 
-  @Transactional(readOnly = true)
-  public List<ProjectDto> readExceptMyProjectList(
-    Long currentCrewId,
-    Long companyId,
-    String name,
-    String ctrClass,
-    String detailCtrClass
-  ) {
-    Specification<Project> specification = ((root, query, criteriaBuilder) -> null);
-    if (name != null)
-      specification = specification.and(ProjectSpecification.equalName(name));
-    if (ctrClass != null)
-      specification = specification.and(ProjectSpecification.equalCtrClass(CtrType.from(ctrClass)));
-    if (detailCtrClass != null)
-      specification = specification.and(ProjectSpecification.equalDetailCtrClass(DetailCtrType.from(detailCtrClass)));
-    if (companyId != null) {
-      specification = specification.and(ProjectSpecification.equalCompanyId(companyId));
+        projectRepository.save(project);
     }
 
-    List<ProjectDto> allProjectList = projectRepository.findAll(specification)
-      .stream()
-      .map((ProjectDto::new))
-      .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<ProjectDto> readExceptMyProjectList(
+            Long currentCrewId,
+            Long companyId,
+            String name,
+            String ctrClass,
+            String detailCtrClass
+    ) {
+        Specification<Project> specification = ((root, query, criteriaBuilder) -> null);
+        if (name != null)
+            specification = specification.and(ProjectSpecification.equalName(name));
+        if (ctrClass != null)
+            specification = specification.and(ProjectSpecification.equalCtrClass(CtrType.from(ctrClass)));
+        if (detailCtrClass != null)
+            specification = specification.and(ProjectSpecification.equalDetailCtrClass(DetailCtrType.from(detailCtrClass)));
+        if (companyId != null) {
+            specification = specification.and(ProjectSpecification.equalCompanyId(companyId));
+        }
 
-    List<ProjectDto> myProjectList = readMyProjectList(currentCrewId);
-    System.out.println(allProjectList);
-    System.out.println(myProjectList);
-    allProjectList.removeAll(myProjectList);
-    System.out.println(allProjectList);
-    return allProjectList;
-  }
+        List<ProjectDto> allProjectList = projectRepository.findAll(specification)
+                .stream()
+                .map((ProjectDto::new))
+                .collect(Collectors.toList());
 
-  @Transactional(readOnly = true)
-  public List<ProjectDto> readMyProjectList(Long crewId) {
-    Crew foundedCrew = crewService.readCrewById(crewId);
-    System.out.println(foundedCrew);
+        List<ProjectDto> myProjectList = readMyProjectList(currentCrewId);
 
-    return foundedCrew.getParticipantList()
-      .stream()
-      .map((participant -> new ProjectDto(participant.getProject())))
-      .collect(Collectors.toList());
-  }
+        allProjectList.removeAll(myProjectList);
+        return allProjectList;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectDto> readMyProjectList(Long crewId) {
+        Crew foundedCrew = crewService.readCrewById(crewId);
+
+        return foundedCrew.getParticipantList()
+                .stream()
+                .map((participant -> new ProjectDto(participant.getProject())))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateProject(
+            Long projectId,
+            ProjectReq projectReq,
+            Long crewId
+    ) {
+        Crew crew = crewService.readCrewById(crewId);
+
+        Role role = crew.getRole();
+        if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+        Project project = readProjectById(projectId);
+
+        Participant participant = readParticipantByCrewIdAndProjectIdAnd(crewId, projectId);
+        snust.sbsp.project.domain.type.Role participantRole = participant.getRole();
+        if (!participantRole.equals(snust.sbsp.project.domain.type.Role.MANAGER) && !participantRole.equals(snust.sbsp.project.domain.type.Role.EDITABLE)) {
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        }
+
+        Company company = companyService.findById(projectReq.getCompanyId());
+
+        project.update(company, projectReq);
+    }
+
+    @Transactional(readOnly = true)
+    public Project readProjectById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.PROJECT_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public Participant readParticipantByCrewIdAndProjectIdAnd(Long crewId, Long projectId) {
+        return participantRepository.findByCrewIdAndProjectId(crewId, projectId)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.PARTICIPANT_NOT_FOUND));
+    }
 }

@@ -4,6 +4,7 @@ import lombok.*;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.project.domain.type.CtrType;
 import snust.sbsp.project.domain.type.DetailCtrType;
+import snust.sbsp.project.dto.req.ProjectReq;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -53,4 +54,16 @@ public class Project {
 
   @OneToMany(mappedBy = "project")
   private List<Participant> ParticipantList = new ArrayList<>();
+
+  public void update(Company company, ProjectReq projectReq) {
+    this.company = company;
+    this.name = projectReq.getName();
+    this.startDate = projectReq.getStartDate();
+    this.endDate = projectReq.getEndDate();
+    this.ctrType = CtrType.from(projectReq.getCtrType());
+    this.detailCtrType = DetailCtrType.from(projectReq.getDetailCtrType());
+    this.thumbnailUrl = projectReq.getThumbnailUrl();
+    this.floorUrl = projectReq.getFloorPlanUrl();
+
+  }
 }

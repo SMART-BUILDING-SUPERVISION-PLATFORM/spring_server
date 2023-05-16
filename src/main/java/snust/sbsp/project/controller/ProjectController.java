@@ -17,35 +17,46 @@ import java.util.List;
 @RequestMapping("/api/project")
 public class ProjectController {
 
-	private final ProjectService projectService;
+    private final ProjectService projectService;
 
-	@PostMapping
-	public ResponseEntity<?> newProject(
-		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-		@RequestBody ProjectReq projectReq
-	) {
-		projectService.createProject(projectReq, currentCrewId);
+    @PostMapping
+    public ResponseEntity<?> newProject(
+            @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+            @RequestBody ProjectReq projectReq
+    ) {
+        projectService.createProject(projectReq, currentCrewId);
 
-		return Response.ok(HttpStatus.OK);
-	}
+        return Response.ok(HttpStatus.OK);
+    }
 
-	@GetMapping
-	public ResponseEntity<List<ProjectDto>> getProjectList(
-		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-		@RequestParam(required = false, value = "companyId") Long companyId,
-		@RequestParam(required = false, value = "name") String name,
-		@RequestParam(required = false, value = "ctrClass") String ctrClass,
-		@RequestParam(required = false, value = "detailCtrClass") String detailCtrClass,
-		@RequestParam(required = false, value = "onlyMine") Boolean onlyMine
-	) {
-		List<ProjectDto> projectList;
+    @GetMapping
+    public ResponseEntity<List<ProjectDto>> getProjectList(
+            @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+            @RequestParam(required = false, value = "companyId") Long companyId,
+            @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false, value = "ctrClass") String ctrClass,
+            @RequestParam(required = false, value = "detailCtrClass") String detailCtrClass,
+            @RequestParam(required = false, value = "onlyMine") Boolean onlyMine
+    ) {
+        List<ProjectDto> projectList;
 
-		if (onlyMine)
-			projectList = projectService.readMyProjectList(currentCrewId);
-		else
-			projectList = projectService.readExceptMyProjectList(currentCrewId, companyId, name, ctrClass, detailCtrClass);
+        if (onlyMine)
+            projectList = projectService.readMyProjectList(currentCrewId);
+        else
+            projectList = projectService.readExceptMyProjectList(currentCrewId, companyId, name, ctrClass, detailCtrClass);
 
 
-		return Response.ok(HttpStatus.OK, projectList);
-	}
+        return Response.ok(HttpStatus.OK, projectList);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProject(
+            @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+            @PathVariable("id") Long id,
+            @RequestBody ProjectReq projectReq
+    ) {
+        projectService.updateProject(id, projectReq, currentCrewId);
+
+        return Response.ok(HttpStatus.OK);
+    }
 }
