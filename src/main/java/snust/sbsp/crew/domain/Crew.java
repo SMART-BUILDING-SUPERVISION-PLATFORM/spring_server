@@ -46,7 +46,7 @@ public class Crew {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    @OneToMany(mappedBy = "crew", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @OneToMany(mappedBy = "crew", orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<Participant> participantList = new ArrayList<>();
 
     public void togglePending() {

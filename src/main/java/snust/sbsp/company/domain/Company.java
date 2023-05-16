@@ -16,23 +16,23 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Company {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(name = "name")
-  private String name;
+    @Column(name = "name")
+    private String name;
 
-  @Column(name = "address")
-  private String address;
+    @Column(name = "address")
+    private String address;
 
-  @OneToMany(mappedBy = "company")
-  private List<Crew> crewList = new ArrayList<>();
+    @OneToMany(mappedBy = "company", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Crew> crewList = new ArrayList<>();
 
-  @OneToMany(mappedBy = "company")
-  private List<Project> projectList = new ArrayList<>();
+    @OneToMany(mappedBy = "company", orphanRemoval = true, cascade = {CascadeType.PERSIST})
+    private List<Project> projectList = new ArrayList<>();
 
-  public CompanyDto toDto() {
-    return new CompanyDto(this);
-  }
+    public CompanyDto toDto() {
+        return new CompanyDto(this);
+    }
 }

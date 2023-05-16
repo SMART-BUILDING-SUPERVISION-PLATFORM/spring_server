@@ -52,7 +52,7 @@ public class Project {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    @OneToMany(mappedBy = "project", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @OneToMany(mappedBy = "project", orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<Participant> ParticipantList = new ArrayList<>();
 
     public void update(Company company, ProjectReq projectReq) {
