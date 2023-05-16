@@ -23,58 +23,58 @@ import javax.websocket.server.PathParam;
 @RequestMapping("/api/crew/auth")
 public class AuthController {
 
-  private final EmailUtil emailUtil;
+	private final EmailUtil emailUtil;
 
-  private final SessionUtil sessionUtil;
+	private final SessionUtil sessionUtil;
 
-  private final AuthService authService;
+	private final AuthService authService;
 
-  @PostMapping("/sign-up")
-  public ResponseEntity<?> join(@RequestBody SignUpReq signUpReq) {
-    authService.signUp(signUpReq);
+	@PostMapping("/sign-up")
+	public ResponseEntity<?> join(@RequestBody SignUpReq signUpReq) {
+		authService.signUp(signUpReq);
 
-    return Response.ok(HttpStatus.CREATED);
-  }
+		return Response.ok(HttpStatus.CREATED);
+	}
 
-  @PostMapping("/sign-in")
-  public ResponseEntity<?> signIn(
-    @RequestBody SignInReq signInReq,
-    HttpServletRequest request
-  ) {
-    Crew crew = authService.validateCrew(signInReq);
-    ResponseCookie responseCookie = sessionUtil.createCookie(crew, request);
+	@PostMapping("/sign-in")
+	public ResponseEntity<?> signIn(
+		@RequestBody SignInReq signInReq,
+		HttpServletRequest request
+	) {
+		Crew crew = authService.validateCrew(signInReq);
+		ResponseCookie responseCookie = sessionUtil.createCookie(crew, request);
 
-    return Response.ok(HttpStatus.OK, null, responseCookie);
-  }
+		return Response.ok(HttpStatus.OK, null, responseCookie);
+	}
 
-  @GetMapping("/sign-out")
-  public ResponseEntity<?> signOut(
-    @CookieValue(
-      value = "JSESSIONID"
-    ) String jSessionId,
-    HttpServletRequest request
-  ) {
-    sessionUtil.removeSession(jSessionId, request);
+	@GetMapping("/sign-out")
+	public ResponseEntity<?> signOut(
+		@CookieValue(
+			value = "JSESSIONID"
+		) String jSessionId,
+		HttpServletRequest request
+	) {
+		sessionUtil.removeSession(jSessionId, request);
 
-    return Response.ok(HttpStatus.OK);
-  }
+		return Response.ok(HttpStatus.OK);
+	}
 
-  @GetMapping("/email-duplication")
-  public ResponseEntity<?> validateEmail(
-    @PathParam("email") String email
-  ) {
-    authService.isEmailDuplicated(email);
-    emailUtil.sendSimpleMessage(email);
+	@GetMapping("/email-duplication")
+	public ResponseEntity<?> validateEmail(
+		@PathParam("email") String email
+	) {
+		authService.isEmailDuplicated(email);
+		emailUtil.sendSimpleMessage(email);
 
-    return Response.ok(HttpStatus.OK);
-  }
+		return Response.ok(HttpStatus.OK);
+	}
 
-  @PostMapping("/validate-code")
-  public ResponseEntity<ValidationCodeDto> validateCode(
-    @RequestBody CodeValidationReq codeValidationReq
-  ) {
-    String newCode = emailUtil.isValidateCode(codeValidationReq);
+	@PostMapping("/validate-code")
+	public ResponseEntity<ValidationCodeDto> validateCode(
+		@RequestBody CodeValidationReq codeValidationReq
+	) {
+		String newCode = emailUtil.isValidateCode(codeValidationReq);
 
-    return Response.ok(HttpStatus.OK, new ValidationCodeDto(newCode));
-  }
+		return Response.ok(HttpStatus.OK, new ValidationCodeDto(newCode));
+	}
 }

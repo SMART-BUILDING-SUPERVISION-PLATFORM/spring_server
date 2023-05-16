@@ -36,7 +36,7 @@ public class Response<T> {
       .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
       .body(data);
   }
-
+  
   public static ResponseEntity<ErrorResponse> fail(CustomCommonException e) {
 
     return ResponseEntity

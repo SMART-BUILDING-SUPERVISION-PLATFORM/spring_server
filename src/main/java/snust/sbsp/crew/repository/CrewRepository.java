@@ -8,7 +8,7 @@ import snust.sbsp.crew.domain.type.Role;
 import java.util.Optional;
 
 public interface CrewRepository extends JpaRepository<Crew, Long>, JpaSpecificationExecutor<Crew> {
-  
+
   Optional<Crew> findByEmail(String email);
 
   Optional<Crew> findByIdAndRole(Long id, Role role);

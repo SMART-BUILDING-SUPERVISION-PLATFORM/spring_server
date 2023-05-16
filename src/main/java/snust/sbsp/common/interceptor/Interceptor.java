@@ -21,13 +21,14 @@ public class Interceptor implements HandlerInterceptor {
     HttpServletRequest request,
     HttpServletResponse response,
     Object handler
-  ) throws Exception {
+  ) throws CustomCommonException {
     Cookie cookie;
+    Cookie[] cookies = request.getCookies();
 
     try {
-      if (request.getCookies() == null) throw new CustomCommonException(ErrorCode.SESSION_NOT_FOUND);
+      if (cookies == null) throw new CustomCommonException(ErrorCode.SESSION_NOT_FOUND);
 
-      cookie = Arrays.stream(request.getCookies())
+      cookie = Arrays.stream(cookies)
         .filter(c -> c.getName().equals("JSESSIONID"))
         .findAny()
         .orElseThrow(() -> new CustomCommonException(ErrorCode.SESSION_NOT_FOUND));

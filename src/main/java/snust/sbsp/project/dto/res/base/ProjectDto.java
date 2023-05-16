@@ -4,6 +4,7 @@ import lombok.Getter;
 import snust.sbsp.project.domain.Project;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 public class ProjectDto {
@@ -30,5 +31,18 @@ public class ProjectDto {
     this.processRate = project.getProcessRate();
     this.thumbnailUrl = project.getThumbnailUrl();
     this.floorUrl = project.getFloorUrl();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ProjectDto that = (ProjectDto) o;
+    return Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 }

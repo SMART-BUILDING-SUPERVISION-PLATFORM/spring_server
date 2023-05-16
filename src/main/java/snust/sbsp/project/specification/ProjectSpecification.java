@@ -1,14 +1,13 @@
 package snust.sbsp.project.specification;
 
 import org.springframework.data.jpa.domain.Specification;
-import snust.sbsp.company.domain.Company;
 import snust.sbsp.project.domain.Project;
 import snust.sbsp.project.domain.type.CtrType;
 import snust.sbsp.project.domain.type.DetailCtrType;
 
 public class ProjectSpecification {
-  public static Specification<Project> equalCompany(Company company) {
-    return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company"), company));
+  public static Specification<Project> equalCompanyId(Long companyId) {
+    return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("company").get("id"), companyId));
   }
 
   public static Specification<Project> equalName(String name) {

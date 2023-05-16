@@ -17,88 +17,88 @@ import java.util.List;
 @RequestMapping("/api/crew")
 public class CrewController {
 
-  private final CrewService crewService;
+	private final CrewService crewService;
 
-  @GetMapping
-  public ResponseEntity<CrewRes> getInformation(
-    @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId
-  ) {
-    CrewRes crew = crewService.readCrewInformation(currentCrewId);
+	@GetMapping
+	public ResponseEntity<CrewRes> getInformation(
+		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId
+	) {
+		CrewRes crew = crewService.readCrewInformation(currentCrewId);
 
-    return Response.ok(HttpStatus.OK, crew);
-  }
+		return Response.ok(HttpStatus.OK, crew);
+	}
 
-  @GetMapping("/{id}")
-  public ResponseEntity<CrewRes> getCrew(
-    @PathVariable("id") Long id
-  ) {
-    CrewRes crew = crewService.readCrewInformation(id);
+	@GetMapping("/{id}")
+	public ResponseEntity<CrewRes> getCrew(
+		@PathVariable("id") Long id
+	) {
+		CrewRes crew = crewService.readCrewInformation(id);
 
-    return Response.ok(HttpStatus.OK, crew);
-  }
+		return Response.ok(HttpStatus.OK, crew);
+	}
 
-  @GetMapping("/admin-all")
-  public ResponseEntity<List<CrewRes>> getAllCrewList(
-    @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-    @RequestParam(required = false, value = "companyId") Long companyId,
-    @RequestParam(required = false, value = "isPending") Boolean isPending,
-    @RequestParam(required = false, value = "role") Role role,
-    @RequestParam(required = false, value = "name") String name
-  ) {
-    List<CrewRes> crewList = crewService.getAllCrewList(currentCrewId, companyId, isPending, role, name);
+	@GetMapping("/admin-all")
+	public ResponseEntity<List<CrewRes>> getAllCrewList(
+		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+		@RequestParam(required = false, value = "companyId") Long companyId,
+		@RequestParam(required = false, value = "isPending") Boolean isPending,
+		@RequestParam(required = false, value = "role") Role role,
+		@RequestParam(required = false, value = "name") String name
+	) {
+		List<CrewRes> crewList = crewService.getAllCrewList(currentCrewId, companyId, isPending, role, name);
 
-    return Response.ok(HttpStatus.OK, crewList);
-  }
+		return Response.ok(HttpStatus.OK, crewList);
+	}
 
-  @GetMapping("/admin-ca")
-  public ResponseEntity<List<CrewRes>> getCompanyCrewList(
-    @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-    @RequestParam(required = false, value = "isPending") Boolean isPending,
-    @RequestParam(required = false, value = "role") Role role,
-    @RequestParam(required = false, value = "name") String name
-  ) {
-    List<CrewRes> crewList = crewService.readCompanyCrewList(currentCrewId, isPending, role, name);
+	@GetMapping("/admin-ca")
+	public ResponseEntity<List<CrewRes>> getCompanyCrewList(
+		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+		@RequestParam(required = false, value = "isPending") Boolean isPending,
+		@RequestParam(required = false, value = "role") Role role,
+		@RequestParam(required = false, value = "name") String name
+	) {
+		List<CrewRes> crewList = crewService.readCompanyCrewList(currentCrewId, isPending, role, name);
 
-    return Response.ok(HttpStatus.OK, crewList);
-  }
+		return Response.ok(HttpStatus.OK, crewList);
+	}
 
-  @PutMapping("/admin-ca/{id}")
-  public ResponseEntity<?> togglePendingByCa(
-    @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-    @PathVariable("id") Long crewId
-  ) {
-    crewService.togglePendingByCa(currentCrewId, crewId);
+	@PutMapping("/admin-ca/{id}")
+	public ResponseEntity<?> togglePendingByCa(
+		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+		@PathVariable("id") Long crewId
+	) {
+		crewService.togglePendingByCa(currentCrewId, crewId);
 
-    return Response.ok(HttpStatus.OK);
-  }
+		return Response.ok(HttpStatus.OK);
+	}
 
-  @PutMapping("/admin-sa/{id}")
-  public ResponseEntity<?> togglePendingBySa(
-    @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-    @PathVariable("id") Long crewId
-  ) {
-    crewService.togglePendingBySa(currentCrewId, crewId);
+	@PutMapping("/admin-sa/{id}")
+	public ResponseEntity<?> togglePendingBySa(
+		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+		@PathVariable("id") Long crewId
+	) {
+		crewService.togglePendingBySa(currentCrewId, crewId);
 
-    return Response.ok(HttpStatus.OK);
-  }
+		return Response.ok(HttpStatus.OK);
+	}
 
-  @DeleteMapping("/admin-ca/{id}")
-  public ResponseEntity<?> deleteCompanyCrew(
-    @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-    @PathVariable("id") Long id
-  ) {
-    crewService.deleteCompanyCrew(currentCrewId, id);
+	@DeleteMapping("/admin-ca/{id}")
+	public ResponseEntity<?> deleteCompanyCrew(
+		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+		@PathVariable("id") Long id
+	) {
+		crewService.deleteCompanyCrew(currentCrewId, id);
 
-    return Response.ok(HttpStatus.OK);
-  }
+		return Response.ok(HttpStatus.OK);
+	}
 
-  @DeleteMapping("/admin-sa/{id}")
-  public ResponseEntity<?> deleteCrew(
-    @RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-    @PathVariable("id") Long id
-  ) {
-    crewService.deleteCrew(currentCrewId, id);
+	@DeleteMapping("/admin-sa/{id}")
+	public ResponseEntity<?> deleteCrew(
+		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+		@PathVariable("id") Long id
+	) {
+		crewService.deleteCrew(currentCrewId, id);
 
-    return Response.ok(HttpStatus.OK);
-  }
+		return Response.ok(HttpStatus.OK);
+	}
 }
