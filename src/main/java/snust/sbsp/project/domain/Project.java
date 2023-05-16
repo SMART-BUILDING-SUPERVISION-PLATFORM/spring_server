@@ -18,52 +18,52 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Project {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(name = "name")
-  private String name;
+    @Column(name = "name")
+    private String name;
 
-  @Column(name = "start_date")
-  private LocalDate startDate;
+    @Column(name = "start_date")
+    private LocalDate startDate;
 
-  @Column(name = "end_date")
-  private LocalDate endDate;
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
-  @Column(name = "process_rate")
-  private int processRate;
+    @Column(name = "process_rate")
+    private int processRate;
 
-  @Column(name = "ctr_type")
-  @Enumerated(value = EnumType.STRING)
-  private CtrType ctrType;
+    @Column(name = "ctr_type")
+    @Enumerated(value = EnumType.STRING)
+    private CtrType ctrType;
 
-  @Column(name = "detail_ctr_type")
-  @Enumerated(value = EnumType.STRING)
-  private DetailCtrType detailCtrType;
+    @Column(name = "detail_ctr_type")
+    @Enumerated(value = EnumType.STRING)
+    private DetailCtrType detailCtrType;
 
-  @Column(name = "thumbnail_url")
-  private String thumbnailUrl;
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
 
-  @Column(name = "floor_url")
-  private String floorUrl;
+    @Column(name = "floor_url")
+    private String floorUrl;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "company_id")
-  private Company company;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
-  @OneToMany(mappedBy = "project")
-  private List<Participant> ParticipantList = new ArrayList<>();
+    @OneToMany(mappedBy = "project", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    private List<Participant> ParticipantList = new ArrayList<>();
 
-  public void update(Company company, ProjectReq projectReq) {
-    this.company = company;
-    this.name = projectReq.getName();
-    this.startDate = projectReq.getStartDate();
-    this.endDate = projectReq.getEndDate();
-    this.ctrType = CtrType.from(projectReq.getCtrType());
-    this.detailCtrType = DetailCtrType.from(projectReq.getDetailCtrType());
-    this.thumbnailUrl = projectReq.getThumbnailUrl();
-    this.floorUrl = projectReq.getFloorPlanUrl();
+    public void update(Company company, ProjectReq projectReq) {
+        this.company = company;
+        this.name = projectReq.getName();
+        this.startDate = projectReq.getStartDate();
+        this.endDate = projectReq.getEndDate();
+        this.ctrType = CtrType.from(projectReq.getCtrType());
+        this.detailCtrType = DetailCtrType.from(projectReq.getDetailCtrType());
+        this.thumbnailUrl = projectReq.getThumbnailUrl();
+        this.floorUrl = projectReq.getFloorPlanUrl();
 
-  }
+    }
 }
