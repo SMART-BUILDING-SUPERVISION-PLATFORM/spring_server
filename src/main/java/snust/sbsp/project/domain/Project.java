@@ -55,8 +55,7 @@ public class Project {
     @OneToMany(mappedBy = "project", orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<Participant> ParticipantList = new ArrayList<>();
 
-    public void update(Company company, ProjectReq projectReq) {
-        this.company = company;
+    public void update(ProjectReq projectReq) {
         this.name = projectReq.getName();
         this.startDate = projectReq.getStartDate();
         this.endDate = projectReq.getEndDate();

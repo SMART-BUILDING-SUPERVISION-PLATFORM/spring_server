@@ -113,22 +113,25 @@ public class ProjectService {
             Long crewId
     ) {
         Crew crew = crewService.readCrewById(crewId);
-
-        Role role = crew.getRole();
-        if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
-            throw new CustomCommonException(ErrorCode.FORBIDDEN);
-
         Project project = readProjectById(projectId);
 
-        Participant participant = readParticipantByCrewIdAndProjectIdAnd(crewId, projectId);
-        snust.sbsp.project.domain.type.Role participantRole = participant.getRole();
-        if (!participantRole.equals(snust.sbsp.project.domain.type.Role.MANAGER) && !participantRole.equals(snust.sbsp.project.domain.type.Role.EDITABLE)) {
-            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        switch (crew.getRole()) {
+            case SERVICE_ADMIN:
+                break;
+            case COMPANY_ADMIN:
+                if (!project.getCompany().getId().equals(crew.getCompany().getId())) {
+                    throw new CustomCommonException(ErrorCode.FORBIDDEN);
+                }
+                break;
+            default:
+                Participant participant = readParticipantByCrewIdAndProjectIdAnd(crewId, projectId);
+                snust.sbsp.project.domain.type.Role participantRole = participant.getRole();
+                if (!participantRole.equals(snust.sbsp.project.domain.type.Role.MANAGER) && !participantRole.equals(snust.sbsp.project.domain.type.Role.EDITABLE)) {
+                    throw new CustomCommonException(ErrorCode.FORBIDDEN);
+                }
         }
 
-        Company company = companyService.findById(projectReq.getCompanyId());
-
-        project.update(company, projectReq);
+        project.update(projectReq);
     }
 
     @Transactional
@@ -137,17 +140,22 @@ public class ProjectService {
             Long crewId
     ) {
         Crew crew = crewService.readCrewById(crewId);
+        Project project = readProjectById(projectId);
 
-        Role role = crew.getRole();
-        if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
-            throw new CustomCommonException(ErrorCode.FORBIDDEN);
-
-        readProjectById(projectId);
-
-        Participant participant = readParticipantByCrewIdAndProjectIdAnd(crewId, projectId);
-        snust.sbsp.project.domain.type.Role participantRole = participant.getRole();
-        if (!participantRole.equals(snust.sbsp.project.domain.type.Role.MANAGER)) {
-            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+        switch (crew.getRole()) {
+            case SERVICE_ADMIN:
+                break;
+            case COMPANY_ADMIN:
+                if (!project.getCompany().getId().equals(crew.getCompany().getId())) {
+                    throw new CustomCommonException(ErrorCode.FORBIDDEN);
+                }
+                break;
+            default:
+                Participant participant = readParticipantByCrewIdAndProjectIdAnd(crewId, projectId);
+                snust.sbsp.project.domain.type.Role participantRole = participant.getRole();
+                if (!participantRole.equals(snust.sbsp.project.domain.type.Role.MANAGER)) {
+                    throw new CustomCommonException(ErrorCode.FORBIDDEN);
+                }
         }
 
         projectRepository.deleteById(projectId);
