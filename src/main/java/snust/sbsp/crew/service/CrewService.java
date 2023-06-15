@@ -6,179 +6,146 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
-import snust.sbsp.common.util.SessionUtil;
-import snust.sbsp.company.domain.Company;
-import snust.sbsp.company.dto.res.base.CompanyDto;
-import snust.sbsp.company.service.CompanyService;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.dto.res.CrewRes;
 import snust.sbsp.crew.repository.CrewRepository;
 import snust.sbsp.crew.specification.CrewSpecification;
-import snust.sbsp.project.service.ProjectService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CrewService {
-  private final SessionUtil sessionUtil;
 
-  private final CompanyService companyService;
+    private final CrewRepository crewRepository;
 
-  private final ProjectService projectService;
+    private final CrewSpecification crewSpecification;
 
-  private final CrewRepository crewRepository;
-
-  @Transactional(readOnly = true)
-  public Crew readCrew(String crewEmail) {
-
-    return crewRepository.findByEmail(crewEmail)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-  }
-
-  @Transactional(readOnly = true)
-  public CrewRes readCrew(Long crewId) {
-    Crew crew = crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-
-    return CrewRes.builder()
-      .crew(crew)
-      .company(new CompanyDto(crew.getCompany()))
-      .projectList(projectService.readProjectList(crew))
-      .build();
-  }
-
-  @Transactional(readOnly = true)
-  public List<CrewRes> readCompanyCrewList(
-    Long crewId,
-    Boolean isPending,
-    Role role,
-    String name
-  ) {
-    Crew foundCrew = crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-
-    if (foundCrew.getRole() != Role.COMPANY_ADMIN)
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
-
-    Specification<Crew> specification = ((root, query, criteriaBuilder) -> null);
-    if (name != null)
-      specification = specification.and(CrewSpecification.equalName(name));
-    if (role != null)
-      specification = specification.and(CrewSpecification.equalRole(role));
-    if (isPending != null)
-      specification = specification.and(CrewSpecification.equalIsPending(isPending));
-
-    List<Crew> crewList = crewRepository.findAll(specification);
-
-    return crewList
-      .stream()
-      .map(crew ->
-        CrewRes
-          .builder()
-          .crew(crew)
-          .company(new CompanyDto(crew.getCompany()))
-          .build()
-      ).collect(Collectors.toList());
-  }
-
-  public List<CrewRes> getAllCrewList(
-    Long crewId,
-    Long companyId,
-    Boolean isPending,
-    Role role,
-    String name
-  ) {
-    Crew foundCrew = crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-
-    if (foundCrew.getRole() != Role.COMPANY_ADMIN || foundCrew.getRole() != Role.SERVICE_ADMIN)
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
-
-    Specification<Crew> specification = ((root, query, criteriaBuilder) -> null);
-    if (name != null)
-      specification = specification.and(CrewSpecification.equalName(name));
-    if (role != null)
-      specification = specification.and(CrewSpecification.equalRole(role));
-    if (isPending != null)
-      specification = specification.and(CrewSpecification.equalIsPending(isPending));
-    if (companyId != null) {
-      Company company = companyService.findById(companyId);
-      specification = specification.and(CrewSpecification.equalCompany(company));
+    @Transactional(readOnly = true)
+    public Crew readCrewByEmail(String crewEmail) {
+        return crewRepository.findByEmail(crewEmail)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
     }
 
-    List<Crew> crewList = crewRepository.findAll(specification);
-
-    return crewList
-      .stream()
-      .map(crew ->
-        CrewRes
-          .builder()
-          .crew(crew)
-          .company(new CompanyDto(crew.getCompany()))
-          .build()
-      ).collect(Collectors.toList());
-  }
-
-  @Transactional
-  public void togglePendingByCa(
-    Long companyAdminId,
-    Long crewId
-  ) {
-    Crew companyAdmin = crewRepository.findByIdAndRole(companyAdminId, Role.COMPANY_ADMIN)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
-
-    Crew crew = crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-
-    if (!companyAdmin.getCompany().equals(crew.getCompany())) {
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+    @Transactional(readOnly = true)
+    public Crew readCrewById(Long crewId) {
+        return crewRepository.findById(crewId)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
     }
 
-    crew.togglePending();
-  }
-
-  @Transactional
-  public void togglePendingBySa(
-    Long serviceAdminId,
-    Long crewId
-  ) {
-    crewRepository.findByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
-
-    Crew crew = crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-
-    crew.togglePending();
-  }
-
-
-  public void deleteCompanyCrew(Long companyAdminId, Long crewId) {
-    Crew companyAdmin = crewRepository.findByIdAndRole(companyAdminId, Role.COMPANY_ADMIN)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
-
-    Crew crew = crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
-
-    if (!companyAdmin.getCompany().equals(crew.getCompany())) {
-      throw new CustomCommonException(ErrorCode.FORBIDDEN);
+    @Transactional(readOnly = true)
+    public Crew readCrewByIdAndRole(Long crewId, Role role) {
+        return crewRepository.findByIdAndRole(crewId, role)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
     }
 
-    crewRepository.deleteById(crewId);
-  }
+    public CrewRes readCrewInformation(Long crewId) {
+        Crew crew = readCrewById(crewId);
+        return CrewRes.builder()
+                .crew(crew)
+                .company(crew.getCompany().toDto())
+                .build();
+    }
 
-  @Transactional
-  public void deleteCrew(Long serviceAdminId, Long crewId) {
-    crewRepository.findByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
+    @Transactional(readOnly = true)
+    public List<CrewRes> readCompanyCrewList(
+            Long crewId,
+            Boolean isPending,
+            Role role,
+            String name
+    ) {
+        readCrewByIdAndRole(crewId, Role.COMPANY_ADMIN);
 
-    crewRepository.findById(crewId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.CREW_NOT_FOUND));
+        Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, null);
+        List<Crew> crewList = crewRepository.findAll(specification);
 
-    crewRepository.deleteById(crewId);
+        return crewList
+                .stream()
+                .map(crew ->
+                        CrewRes
+                                .builder()
+                                .crew(crew)
+                                .company(crew.getCompany().toDto())
+                                .build()
+                ).collect(Collectors.toList());
+    }
 
-  }
+    @Transactional(readOnly = true)
+    public List<CrewRes> getAllCrewList(
+            Long crewId,
+            Long companyId,
+            Boolean isPending,
+            Role role,
+            String name
+    ) {
+        Crew foundCrew = readCrewById(crewId);
+
+        if (!foundCrew.getRole().equals(Role.COMPANY_ADMIN) && !foundCrew.getRole().equals(Role.SERVICE_ADMIN))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+        Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, companyId);
+
+        List<Crew> crewList = crewRepository.findAll(specification);
+
+        return crewList
+                .stream()
+                .map(crew ->
+                        CrewRes
+                                .builder()
+                                .crew(crew)
+                                .company(crew.getCompany().toDto())
+                                .build()
+                ).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void togglePendingByCa(
+            Long companyAdminId,
+            Long crewId
+    ) {
+        Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
+
+        Crew crew = readCrewById(crewId);
+
+        if (!companyAdmin.getCompany().equals(crew.getCompany()))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+        crew.togglePending();
+    }
+
+    @Transactional
+    public void togglePendingBySa(
+            Long serviceAdminId,
+            Long crewId
+    ) {
+        readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
+
+        Crew crew = readCrewById(crewId);
+
+        crew.togglePending();
+    }
+
+    @Transactional
+    public void deleteCompanyCrew(Long companyAdminId, Long crewId) {
+//      SA도 되게 바꿔야함
+        Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
+
+        Crew crew = readCrewById(crewId);
+
+        if (!companyAdmin.getCompany().equals(crew.getCompany()))
+            throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+        crewRepository.deleteById(crewId);
+    }
+
+    @Transactional
+    public void deleteCrew(Long serviceAdminId, Long crewId) {
+        readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
+
+        readCrewById(crewId);
+
+        crewRepository.deleteById(crewId);
+    }
 }

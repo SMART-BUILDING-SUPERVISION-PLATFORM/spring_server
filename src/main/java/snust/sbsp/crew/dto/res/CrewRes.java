@@ -15,6 +15,7 @@ public class CrewRes extends CrewDto {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private final CompanyDto company;
+  
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private final List<ProjectDto> projectList;
 

@@ -22,7 +22,7 @@ public class CompanyController {
 
   @GetMapping
   public ResponseEntity<List<CompanyRes>> getCompanyList(
-    @RequestParam("name") String name
+    @RequestParam(required = false, value = "name") String name
   ) {
     List<CompanyRes> companyList = companyService.readCompany(name);
 

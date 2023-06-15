@@ -16,33 +16,37 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CompanyService {
 
-  private final CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
 
-  @Transactional(readOnly = true)
-  public List<CompanyRes> readCompany(String companyName) {
-    List<Company> companyList = companyRepository.findAll()
-      .stream()
-      .filter(company ->
-        company
-          .getName()
-          .toLowerCase()
-          .contains(companyName.toLowerCase())
-      ).collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<CompanyRes> readCompany(String companyName) {
+        List<Company> companyList = companyRepository.findAll();
 
-    return companyList
-      .stream()
-      .map(company ->
-        CompanyRes
-          .builder()
-          .company(company)
-          .build()
-      ).collect(Collectors.toList());
-  }
+        if (companyName != null) {
+            companyList =
+                    companyList
+                            .stream()
+                            .filter(company ->
+                                    company
+                                            .getName()
+                                            .toLowerCase()
+                                            .contains(companyName.toLowerCase())
+                            ).collect(Collectors.toList());
+        }
 
-  @Transactional(readOnly = true)
-  public Company findById(Long companyId) {
+        return companyList
+                .stream()
+                .map(company ->
+                        CompanyRes
+                                .builder()
+                                .company(company)
+                                .build()
+                ).collect(Collectors.toList());
+    }
 
-    return companyRepository.findById(companyId)
-      .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
-  }
+    @Transactional(readOnly = true)
+    public Company findById(Long companyId) {
+        return companyRepository.findById(companyId)
+                .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
+    }
 }

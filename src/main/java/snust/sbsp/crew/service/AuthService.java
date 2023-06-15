@@ -33,7 +33,7 @@ public class AuthService {
   public void signUp(SignUpReq signupReq) {
     Long companyId = signupReq.getCompanyId();
     Company company = companyService.findById(companyId);
-    String newCode = signupReq.getNewCode();
+    String newCode = signupReq.getValidationCode();
 
     if (!newCode.equals(redisUtil.getData(signupReq.getEmail())))
       throw new CustomCommonException(ErrorCode.FORBIDDEN);
@@ -60,12 +60,14 @@ public class AuthService {
 
   @Transactional(readOnly = true)
   public Crew validateCrew(SignInReq signInReq) {
-    Crew crew = crewService.readCrew(signInReq.getEmail());
+    Crew crew = crewService.readCrewByEmail(signInReq.getEmail());
     String decryptedPassword = cryptoUtil.decrypt(crew.getPassword());
 
     if (signInReq.getPassword().equals(decryptedPassword)) {
+
       if (crew.isPending())
         throw new CustomCommonException(ErrorCode.PENDING_STATE);
+
       return crew;
     } else
       throw new CustomCommonException(ErrorCode.PASSWORD_INVALID);
@@ -77,17 +79,18 @@ public class AuthService {
       throw new CustomCommonException(ErrorCode.EMAIL_DUPLICATED);
   }
 
-  private void isPossibleToJoin(SignUpReq signUpReq) {
-    if (isAdminPresent(signUpReq))
-      throw new CustomCommonException(ErrorCode.COMPANY_HAS_ADMIN);
-  }
-
   @Transactional(readOnly = true)
-  protected boolean isAdminPresent(SignUpReq signUpReq) {
+  private boolean isAdminPresent(SignUpReq signUpReq) {
     Company company = companyService.findById(signUpReq.getCompanyId());
 
     return company.getCrewList()
       .stream()
       .anyMatch(crew -> crew.getRole().equals(Role.COMPANY_ADMIN));
   }
+
+  private void isPossibleToJoin(SignUpReq signUpReq) {
+    if (isAdminPresent(signUpReq))
+      throw new CustomCommonException(ErrorCode.COMPANY_HAS_ADMIN);
+  }
+
 }

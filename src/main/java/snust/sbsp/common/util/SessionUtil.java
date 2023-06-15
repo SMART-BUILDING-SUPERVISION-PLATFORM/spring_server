@@ -1,18 +1,21 @@
 package snust.sbsp.common.util;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import snust.sbsp.common.exception.CustomCommonException;
-import snust.sbsp.common.exception.ErrorCode;
 import snust.sbsp.crew.domain.Crew;
+import snust.sbsp.crew.repository.CrewRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @Component
 @Transactional
+@RequiredArgsConstructor
 public class SessionUtil {
+
+  private final CrewRepository crewRepository;
 
   public ResponseCookie createCookie(
     Crew crew,
@@ -34,10 +37,12 @@ public class SessionUtil {
     Crew crew,
     HttpServletRequest request
   ) {
-
     HttpSession session = request.getSession();
     String sessionId = session.getId();
+
+
     session.setAttribute(sessionId, crew.getId());
+
     return sessionId;
   }
 
@@ -45,21 +50,7 @@ public class SessionUtil {
     String jSessionId,
     HttpServletRequest request
   ) {
-
     HttpSession session = request.getSession();
     session.removeAttribute(jSessionId);
-  }
-
-  public Long getInfo(
-    String jSessionId,
-    HttpServletRequest request
-  ) {
-    try {
-      HttpSession session = request.getSession();
-
-      return (Long) session.getAttribute(jSessionId);
-    } catch (NullPointerException e) {
-      throw new CustomCommonException(ErrorCode.SESSION_NOT_FOUND);
-    }
   }
 }

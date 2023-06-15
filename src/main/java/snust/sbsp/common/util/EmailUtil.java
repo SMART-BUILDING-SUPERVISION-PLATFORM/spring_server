@@ -37,7 +37,6 @@ public class EmailUtil {
   private String password;
 
   private String createCode() {
-
     Random random = new Random();
     StringBuilder key = new StringBuilder();
 
@@ -63,7 +62,6 @@ public class EmailUtil {
     String to,
     String code
   ) throws MessagingException, UnsupportedEncodingException {
-
     MimeMessage message = javaMailSender.createMimeMessage();
     message.addRecipients(MimeMessage.RecipientType.TO, to);
     message.setSubject(to + "님, SMART BUILDING SUPERVISION PLATFORM 회원 인증코드입니다.");
@@ -82,7 +80,6 @@ public class EmailUtil {
   }
 
   public void sendSimpleMessage(String to) {
-
     MimeMessage message;
     String code = createCode();
 
@@ -103,12 +100,14 @@ public class EmailUtil {
     String code = codeValidationReq.getCode();
 
     String serverCode = redisUtil.getData(email);
+
     if (serverCode == null)
       throw new CustomCommonException(ErrorCode.EMAIL_CODE_NOT_FOUND);
 
     if (serverCode.equals(code)) {
       String newCode = createCode();
       redisUtil.setDataExpire(email, newCode, 60);
+
       return redisUtil.getData(email);
     } else
       throw new CustomCommonException(ErrorCode.EMAIL_CODE_INVALID);

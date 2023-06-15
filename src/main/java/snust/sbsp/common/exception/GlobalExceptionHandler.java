@@ -8,8 +8,8 @@ import snust.sbsp.common.res.Response;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(CustomCommonException.class)
-    public ResponseEntity<?> customCommonException(CustomCommonException e) {
-        return Response.fail(e);
-    }
+  @ExceptionHandler(CustomCommonException.class)
+  public ResponseEntity<?> customCommonException(CustomCommonException e) {
+    return Response.fail(e);
+  }
 }

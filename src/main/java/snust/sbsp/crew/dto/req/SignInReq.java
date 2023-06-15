@@ -2,12 +2,14 @@ package snust.sbsp.crew.dto.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class SignInReq {
 
-  private final String email;
+  private String email;
 
-  private final String password;
+  private String password;
 }

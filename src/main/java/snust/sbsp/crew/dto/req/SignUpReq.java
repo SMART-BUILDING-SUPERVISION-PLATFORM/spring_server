@@ -2,22 +2,24 @@ package snust.sbsp.crew.dto.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class SignUpReq {
 
-  private final Long companyId;
+  private Long companyId;
 
-  private final String email;
+  private String email;
 
-  private final String password;
+  private String password;
 
-  private final String name;
+  private String name;
 
-  private final String number;
+  private String number;
 
-  private final String businessType;
+  private String businessType;
 
-  private final String newCode;
+  private String validationCode;
 }
