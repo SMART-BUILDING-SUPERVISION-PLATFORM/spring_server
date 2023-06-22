@@ -13,19 +13,23 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Participant {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(name = "role")
-  @Enumerated(value = EnumType.STRING)
-  private Role role;
+	@Column(name = "role")
+	@Enumerated(value = EnumType.STRING)
+	private Role role;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "crew_id")
-  private Crew crew;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "crew_id")
+	private Crew crew;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "project_id")
-  private Project project;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "project_id")
+	private Project project;
+
+	public void update(Role role) {
+		this.role = role;
+	}
 }
