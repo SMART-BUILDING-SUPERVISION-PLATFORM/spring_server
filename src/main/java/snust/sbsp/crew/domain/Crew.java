@@ -3,7 +3,6 @@ package snust.sbsp.crew.domain;
 import lombok.*;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.crew.domain.type.Role;
-import snust.sbsp.crew.dto.res.CrewRes;
 import snust.sbsp.project.domain.Participant;
 import snust.sbsp.project.dto.res.base.ProjectDto;
 
@@ -19,41 +18,42 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Crew {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "email")
-    private String email;
+	@Column(name = "email")
+	private String email;
 
-    @Column(name = "password")
-    private String password;
+	@Column(name = "password")
+	private String password;
 
-    @Column(name = "name")
-    private String name;
+	@Column(name = "name")
+	private String name;
 
-    @Column(name = "phone")
-    private String phone;
+	@Column(name = "phone")
+	private String phone;
 
-    @Column(name = "role")
-    @Enumerated(value = EnumType.STRING)
-    private Role role;
+	@Column(name = "role")
+	@Enumerated(value = EnumType.STRING)
+	private Role role;
 
-    @Column(name = "is_pending")
-    private boolean isPending;
+	@Column(name = "is_pending")
+	private boolean isPending;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "company_id")
+	private Company company;
 
-    @OneToMany(mappedBy = "crew", orphanRemoval = true, cascade = CascadeType.PERSIST)
-    private List<Participant> participantList = new ArrayList<>();
+	@OneToMany(mappedBy = "crew", orphanRemoval = true, cascade = CascadeType.PERSIST)
+	private List<Participant> participantList = new ArrayList<>();
 
-    public void togglePending() {
-        this.isPending = !isPending;
-    }
+	public void togglePending() {
+		this.isPending = !isPending;
+	}
 
-    public List<ProjectDto> getProjectDtoList() {
-        return participantList.stream().map(p -> new ProjectDto(p.getProject())).collect(Collectors.toList());
-    }
+	public List<ProjectDto> getProjectDtoList() {
+		return participantList.stream().map(
+			p -> new ProjectDto(p.getProject())).collect(Collectors.toList());
+	}
 }

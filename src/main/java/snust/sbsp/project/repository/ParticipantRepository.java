@@ -6,5 +6,5 @@ import snust.sbsp.project.domain.Participant;
 import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
-    Optional<Participant> findByCrewIdAndProjectId(Long crewId, Long projectId);
+	Optional<Participant> findByCrewIdAndProjectId(Long crewId, Long projectId);
 }
