@@ -39,9 +39,9 @@ public class ProjectService {
 	@Transactional
 	public void createProject(
 		ProjectReq projectReq,
-		Long crewId
+		Long currentCrewId
 	) {
-		Crew crew = crewService.readCrewById(crewId);
+		Crew crew = crewService.readCrewById(currentCrewId);
 
 		Role role = crew.getRole();
 		if (!role.equals(Role.COMPANY_ADMIN) && !role.equals(Role.SERVICE_ADMIN))
@@ -96,8 +96,8 @@ public class ProjectService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ProjectDto> readMyProjectList(Long crewId) {
-		Crew foundedCrew = crewService.readCrewById(crewId);
+	public List<ProjectDto> readMyProjectList(Long currentCrewId) {
+		Crew foundedCrew = crewService.readCrewById(currentCrewId);
 
 		return foundedCrew.getParticipantList()
 			.stream()
@@ -109,9 +109,9 @@ public class ProjectService {
 	public void updateProject(
 		Long projectId,
 		ProjectReq projectReq,
-		Long crewId
+		Long currentCrewId
 	) {
-		Crew crew = crewService.readCrewById(crewId);
+		Crew crew = crewService.readCrewById(currentCrewId);
 		Project project = readProjectById(projectId);
 
 		switch (crew.getRole()) {
@@ -123,7 +123,7 @@ public class ProjectService {
 				}
 				break;
 			default:
-				Participant participant = readParticipantByCrewIdAndProjectIdAnd(crewId, projectId);
+				Participant participant = readParticipantByCrewIdAndProjectId(currentCrewId, projectId);
 				snust.sbsp.project.domain.type.Role participantRole = participant.getRole();
 				if (!participantRole.equals(snust.sbsp.project.domain.type.Role.MANAGER) && !participantRole.equals(snust.sbsp.project.domain.type.Role.EDITABLE)) {
 					throw new CustomCommonException(ErrorCode.FORBIDDEN);
@@ -136,9 +136,9 @@ public class ProjectService {
 	@Transactional
 	public void deleteProject(
 		Long projectId,
-		Long crewId
+		Long currentCrewId
 	) {
-		Crew crew = crewService.readCrewById(crewId);
+		Crew crew = crewService.readCrewById(currentCrewId);
 		Project project = readProjectById(projectId);
 
 		switch (crew.getRole()) {
@@ -149,7 +149,7 @@ public class ProjectService {
 					throw new CustomCommonException(ErrorCode.FORBIDDEN);
 				break;
 			default:
-				Participant participant = readParticipantByCrewIdAndProjectIdAnd(crewId, projectId);
+				Participant participant = readParticipantByCrewIdAndProjectId(currentCrewId, projectId);
 				snust.sbsp.project.domain.type.Role participantRole = participant.getRole();
 				if (!participantRole.equals(snust.sbsp.project.domain.type.Role.MANAGER))
 					throw new CustomCommonException(ErrorCode.FORBIDDEN);
@@ -165,8 +165,8 @@ public class ProjectService {
 	}
 
 	@Transactional(readOnly = true)
-	public Participant readParticipantByCrewIdAndProjectIdAnd(Long crewId, Long projectId) {
-		return participantRepository.findByCrewIdAndProjectId(crewId, projectId)
+	public Participant readParticipantByCrewIdAndProjectId(Long currentCrewId, Long projectId) {
+		return participantRepository.findByCrewIdAndProjectId(currentCrewId, projectId)
 			.orElseThrow(() -> new CustomCommonException(ErrorCode.PARTICIPANT_NOT_FOUND));
 	}
 }
