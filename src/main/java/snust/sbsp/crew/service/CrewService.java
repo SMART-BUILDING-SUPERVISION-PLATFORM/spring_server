@@ -55,14 +55,14 @@ public class CrewService {
 
 	@Transactional(readOnly = true)
 	public List<CrewRes> readCompanyCrewList(
-		Long crewId,
+		Long currentCrewId,
 		Boolean isPending,
 		Role role,
 		String name
 	) {
-		readCrewByIdAndRole(crewId, Role.COMPANY_ADMIN);
+		Crew currentCrew = readCrewByIdAndRole(currentCrewId, Role.COMPANY_ADMIN);
 
-		Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, null);
+		Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, currentCrew.getCompany().getId());
 		List<Crew> crewList = crewRepository.findAll(specification);
 
 		return crewList
