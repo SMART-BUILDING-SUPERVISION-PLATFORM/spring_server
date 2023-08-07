@@ -6,7 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import snust.sbsp.common.interceptor.Interceptor;
 import snust.sbsp.common.res.Response;
-import snust.sbsp.project.dto.req.ParticipantReq;
+import snust.sbsp.project.dto.req.DeleteParticipantReq;
+import snust.sbsp.project.dto.req.UpdateParticipantRoleReq;
 import snust.sbsp.project.service.ParticipantService;
 
 @RestController
@@ -19,9 +20,9 @@ public class ParticipantController {
 	@PostMapping
 	public ResponseEntity<?> join(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-		@RequestBody ParticipantReq participantReq
+		@RequestBody UpdateParticipantRoleReq updateParticipantRoleReq
 	) {
-		participantService.requestToJoin(currentCrewId, participantReq);
+		participantService.requestToJoin(currentCrewId, updateParticipantRoleReq);
 
 		return Response.ok(HttpStatus.CREATED);
 	}
@@ -29,9 +30,9 @@ public class ParticipantController {
 	@PutMapping
 	public ResponseEntity<?> update(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-		@RequestBody ParticipantReq participantReq
+		@RequestBody UpdateParticipantRoleReq updateParticipantRoleReq
 	) {
-		participantService.updateRole(currentCrewId, participantReq);
+		participantService.updateRole(currentCrewId, updateParticipantRoleReq);
 
 		return Response.ok(HttpStatus.OK);
 	}
@@ -39,9 +40,12 @@ public class ParticipantController {
 	@DeleteMapping
 	public ResponseEntity<?> delete(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-		@RequestBody ParticipantReq participantReq
+		@RequestParam("projectId") Long projectId,
+		@RequestParam("targetCrewId") Long targetCrewId
 	) {
-		participantService.deleteParticipant(currentCrewId, participantReq);
+		DeleteParticipantReq deleteParticipantReq = new DeleteParticipantReq(projectId, targetCrewId);
+
+		participantService.deleteParticipant(currentCrewId, deleteParticipantReq);
 
 		return Response.ok(HttpStatus.OK);
 	}
