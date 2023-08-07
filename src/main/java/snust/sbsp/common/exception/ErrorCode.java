@@ -15,10 +15,12 @@ public enum ErrorCode {
 	BUSINESS_TYPE_INVALID(-405, HttpStatus.BAD_REQUEST, "business type invalid."),
 	DIFF_COMPANY(-406, HttpStatus.BAD_REQUEST, "different company between origin and target."),
 	ALREADY_REGISTERED(-407, HttpStatus.BAD_REQUEST, "you've already been registered in this project."),
+	NOTE_TYPE_INVALID(-408, HttpStatus.BAD_REQUEST, "note type invalid."),
 
 	// 403 FORBIDDEN 접근 제한 [-411, -420]
 	PENDING_STATE(-411, HttpStatus.FORBIDDEN, "you are in pending state."),
 	FORBIDDEN(-412, HttpStatus.FORBIDDEN, "you don't have right to access."),
+	REPLIER_ALREADY_EXIST(-413, HttpStatus.FORBIDDEN, "someone already replied to this note."),
 
 	// 404 NON_FOUND 존재하지 않음 [-421, -430]
 	COMPANY_NOT_FOUND(-421, HttpStatus.NOT_FOUND, "company not found."),
@@ -27,6 +29,7 @@ public enum ErrorCode {
 	SESSION_NOT_FOUND(-424, HttpStatus.NOT_FOUND, "session not found."),
 	PROJECT_NOT_FOUND(-425, HttpStatus.NOT_FOUND, "project not found."),
 	PARTICIPANT_NOT_FOUND(-426, HttpStatus.NOT_FOUND, "participant not found."),
+	NOTE_NOT_FOUND(-427, HttpStatus.NOT_FOUND, "note not found."),
 
 	// 500 INTERNAL_SERVER_ERROR [-501, -510]
 	INTERNAL_SERVER_ERROR(-501, HttpStatus.INTERNAL_SERVER_ERROR, "internal server error.");

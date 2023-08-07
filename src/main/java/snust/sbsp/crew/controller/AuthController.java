@@ -12,10 +12,12 @@ import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.dto.req.CodeValidationReq;
 import snust.sbsp.crew.dto.req.SignInReq;
 import snust.sbsp.crew.dto.req.SignUpReq;
+import snust.sbsp.crew.dto.res.base.CrewDto;
 import snust.sbsp.crew.dto.res.etc.ValidationCodeDto;
 import snust.sbsp.crew.service.AuthService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.websocket.server.PathParam;
 
 @RestController
@@ -29,8 +31,25 @@ public class AuthController {
 
 	private final AuthService authService;
 
+	@GetMapping("/check")
+	public ResponseEntity<CrewDto> checkLoggedIn(
+		@CookieValue(
+			value = "JSESSIONID"
+		) String jSessionId,
+		HttpServletRequest request
+	) {
+		sessionUtil.readSession(jSessionId, request);
+		HttpSession session = request.getSession();
+		Crew crew = (Crew) session.getAttribute(jSessionId);
+
+
+		return Response.ok(HttpStatus.OK);
+	}
+
 	@PostMapping("/sign-up")
-	public ResponseEntity<?> join(@RequestBody SignUpReq signUpReq) {
+	public ResponseEntity<?> join(
+		@RequestBody SignUpReq signUpReq
+	) {
 		authService.signUp(signUpReq);
 
 		return Response.ok(HttpStatus.CREATED);
@@ -64,7 +83,7 @@ public class AuthController {
 		@PathParam("email") String email
 	) {
 		authService.isEmailDuplicated(email);
-		emailUtil.sendSimpleMessage(email);
+		emailUtil.sendCode(email);
 
 		return Response.ok(HttpStatus.OK);
 	}

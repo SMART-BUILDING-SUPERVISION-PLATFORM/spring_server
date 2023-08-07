@@ -6,15 +6,15 @@ import snust.sbsp.project.domain.Participant;
 @Getter
 public class ParticipantDto {
 
-  private final Long id;
+	private final Long id;
 
-  private final String name;
-  
-  private final RoleDto role;
+	private final String name;
 
-  public ParticipantDto(Participant participant) {
-    this.id = participant.getId();
-    this.name = participant.getCrew().getName();
-    this.role = new RoleDto(participant.getRole());
-  }
+	private final RoleDto role;
+
+	public ParticipantDto(Participant participant) {
+		this.id = participant.getCrew().getId();
+		this.name = participant.getCrew().getName();
+		this.role = new RoleDto(participant.getProjectRole());
+	}
 }

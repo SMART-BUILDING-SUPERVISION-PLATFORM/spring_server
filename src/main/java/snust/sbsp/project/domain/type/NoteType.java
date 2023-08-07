@@ -9,19 +9,16 @@ import java.util.Arrays;
 
 @Getter
 @AllArgsConstructor
-public enum Role {
+public enum NoteType {
 
-	ADMIN("관리자"),
-	MANAGER("프로젝트 관리자"),
-	EDITABLE("참여 권한자"),
-	READABLE("열람 권한자"),
-	PENDING("참여승인 대기자");
+	CAUTION("caution"),
+	SUPPORT("support");
 
 	private final String value;
 
-	public static Role from(String type) {
+	public static NoteType toEnum(String type) {
 		return Arrays.stream(values())
-			.filter(role -> role.value.equals(type))
+			.filter(noteType -> noteType.value.equals(type))
 			.findFirst()
 			.orElseThrow(() -> new CustomCommonException(ErrorCode.BUSINESS_TYPE_INVALID));
 	}
