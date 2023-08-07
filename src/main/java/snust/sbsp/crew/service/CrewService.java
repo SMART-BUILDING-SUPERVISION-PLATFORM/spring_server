@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
+import snust.sbsp.common.util.EmailUtil;
 import snust.sbsp.crew.domain.Crew;
 import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.dto.res.CrewRes;
@@ -22,6 +23,8 @@ public class CrewService {
 	private final CrewRepository crewRepository;
 
 	private final CrewSpecification crewSpecification;
+
+	private final EmailUtil emailUtil;
 
 	@Transactional(readOnly = true)
 	public Crew readCrewByEmail(String crewEmail) {
@@ -40,6 +43,9 @@ public class CrewService {
 		Long crewId,
 		Role role
 	) {
+		System.out.println("crewId = " + crewId);
+		System.out.println("role.getValue() = " + role.getValue());
+
 		return crewRepository.findByIdAndRole(crewId, role)
 			.orElseThrow(() -> new CustomCommonException(ErrorCode.FORBIDDEN));
 	}
@@ -61,11 +67,9 @@ public class CrewService {
 		String name
 	) {
 		Crew currentCrew = readCrewByIdAndRole(currentCrewId, Role.COMPANY_ADMIN);
-
 		Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, currentCrew.getCompany().getId());
-		List<Crew> crewList = crewRepository.findAll(specification);
 
-		return crewList
+		return getCrewListExceptForMe(specification, currentCrewId)
 			.stream()
 			.map(crew ->
 				CrewRes
@@ -78,22 +82,20 @@ public class CrewService {
 
 	@Transactional(readOnly = true)
 	public List<CrewRes> getAllCrewList(
-		Long crewId,
+		Long currentCrewId,
 		Long companyId,
 		Boolean isPending,
 		Role role,
 		String name
 	) {
-		Crew foundCrew = readCrewById(crewId);
+		Crew foundCrew = readCrewById(currentCrewId);
 
 		if (!foundCrew.getRole().equals(Role.COMPANY_ADMIN) && !foundCrew.getRole().equals(Role.SERVICE_ADMIN))
 			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
 		Specification<Crew> specification = crewSpecification.getSpecification(name, role, isPending, companyId);
 
-		List<Crew> crewList = crewRepository.findAll(specification);
-
-		return crewList
+		return getCrewListExceptForMe(specification, currentCrewId)
 			.stream()
 			.map(crew ->
 				CrewRes
@@ -117,6 +119,7 @@ public class CrewService {
 			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
 		crew.togglePending();
+		emailUtil.sendCrewIsBeingPending(crew.getEmail(), crew.getName(), crew.isPending());
 	}
 
 	@Transactional
@@ -133,7 +136,10 @@ public class CrewService {
 
 	@Transactional
 	public void deleteCompanyCrew(Long companyAdminId, Long crewId) {
-//      SA도 되게 바꿔야함
+
+		if (companyAdminId.equals(crewId))
+			throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
 		Crew companyAdmin = readCrewByIdAndRole(companyAdminId, Role.COMPANY_ADMIN);
 
 		Crew crew = readCrewById(crewId);
@@ -142,14 +148,28 @@ public class CrewService {
 			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
 		crewRepository.deleteById(crewId);
+		emailUtil.sendCrewIsDeleted(crew.getEmail(), crew.getName());
 	}
 
 	@Transactional
 	public void deleteCrew(Long serviceAdminId, Long crewId) {
+		if (serviceAdminId.equals(crewId))
+			throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
 		readCrewByIdAndRole(serviceAdminId, Role.SERVICE_ADMIN);
 
-		readCrewById(crewId);
+		Crew crew = readCrewById(crewId);
 
 		crewRepository.deleteById(crewId);
+		emailUtil.sendCrewIsDeleted(crew.getEmail(), crew.getName());
+	}
+
+	private List<Crew> getCrewListExceptForMe(
+		Specification<Crew> specification,
+		Long currentCrewId
+	) {
+		List<Crew> rawCrewList = crewRepository.findAll(specification);
+
+		return rawCrewList.stream().filter(crew -> !crew.getId().equals(currentCrewId)).collect(Collectors.toList());
 	}
 }

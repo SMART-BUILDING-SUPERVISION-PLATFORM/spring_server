@@ -7,12 +7,14 @@ import snust.sbsp.common.exception.CustomCommonException;
 import snust.sbsp.common.exception.ErrorCode;
 import snust.sbsp.company.domain.Company;
 import snust.sbsp.crew.domain.Crew;
+import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.service.AuthService;
 import snust.sbsp.crew.service.CrewService;
 import snust.sbsp.project.domain.Participant;
 import snust.sbsp.project.domain.Project;
-import snust.sbsp.project.domain.type.Role;
-import snust.sbsp.project.dto.req.ParticipantReq;
+import snust.sbsp.project.domain.type.ProjectRole;
+import snust.sbsp.project.dto.req.DeleteParticipantReq;
+import snust.sbsp.project.dto.req.UpdateParticipantRoleReq;
 import snust.sbsp.project.repository.ParticipantRepository;
 
 import java.util.Optional;
@@ -32,15 +34,15 @@ public class ParticipantService {
 	@Transactional
 	public void requestToJoin(
 		Long currentCrewId,
-		ParticipantReq participantReq
+		UpdateParticipantRoleReq updateParticipantRoleReq
 	) {
 		Crew currentCrew = crewService.readCrewById(currentCrewId);
-		Role initialProjectRoleOfIncomingCrew = authService.isAdmin(currentCrewId)
-			? Role.ADMIN
-			: Role.PENDING;
+		ProjectRole initialProjectProjectRoleOfIncomingCrew = authService.isAdmin(currentCrewId)
+			? ProjectRole.ADMIN
+			: ProjectRole.PENDING;
 
-		Long targetCrewId = participantReq.getTargetCrewId();
-		Long projectId = participantReq.getProjectId();
+		Long targetCrewId = updateParticipantRoleReq.getTargetCrewId();
+		Long projectId = updateParticipantRoleReq.getProjectId();
 		Optional<Participant> participant = participantRepository.findByCrewIdAndProjectId(targetCrewId, projectId);
 		if (participant.isPresent())
 			throw new CustomCommonException(ErrorCode.ALREADY_REGISTERED);
@@ -48,7 +50,7 @@ public class ParticipantService {
 		Project project = projectService.readProjectById(projectId);
 
 		Participant newParticipant = Participant.builder()
-			.role(initialProjectRoleOfIncomingCrew)
+			.projectRole(initialProjectProjectRoleOfIncomingCrew)
 			.crew(currentCrew)
 			.project(project)
 			.build();
@@ -59,43 +61,59 @@ public class ParticipantService {
 	@Transactional
 	public void updateRole(
 		Long currentCrewId,
-		ParticipantReq participantReq
+		UpdateParticipantRoleReq updateParticipantRoleReq
 	) {
-		Long projectId = participantReq.getProjectId();
+		Long projectId = updateParticipantRoleReq.getProjectId();
 		Optional<Participant> currentParticipant = participantRepository.findByCrewIdAndProjectId(
 			currentCrewId,
 			projectId
 		);
 
-		Participant participant = projectService.readParticipantByCrewIdAndProjectId(
-			participantReq.getTargetCrewId(),
+		Participant tartgetParticipant = projectService.readParticipantByCrewIdAndProjectId(
+			updateParticipantRoleReq.getTargetCrewId(),
 			projectId
 		);
 
-		if (!participant.getRole().equals(Role.MANAGER) || currentParticipant.isEmpty())
-			updateRoleByAdmin(currentCrewId, participantReq, participant);
-		else
-			replaceRole(currentCrewId, participantReq, participant);
+		currentParticipant.ifPresent(participant ->
+		{
+			if (!currentParticipant.get().getCrew().getRole().equals(Role.COMPANY_ADMIN) &&
+				!participant.getProjectRole().equals(ProjectRole.MANAGER))
+				throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+			else
+				replaceRole(currentCrewId, updateParticipantRoleReq, tartgetParticipant);
+		});
+
+		if (currentParticipant.isEmpty())
+			updateRoleByAdmin(currentCrewId, updateParticipantRoleReq, tartgetParticipant);
 	}
 
 	@Transactional
 	public void deleteParticipant(
 		Long currentCrewId,
-		ParticipantReq participantReq
+		DeleteParticipantReq deleteParticipantReq
 	) {
 		Crew currentCrew = crewService.readCrewById(currentCrewId);
-		Optional<Participant> currentParticipant = participantRepository.findByCrewIdAndProjectId(currentCrewId, participantReq.getProjectId());
+		Optional<Participant> currentParticipant = participantRepository.findByCrewIdAndProjectId(currentCrewId, deleteParticipantReq.getProjectId());
 
 		if (currentParticipant.isEmpty()) {
 			if (currentCrew.getRole().equals(snust.sbsp.crew.domain.type.Role.COMPANY_ADMIN))
-				deleteParticipantByCa(currentCrew, participantReq);
+				deleteParticipantByCa(currentCrew, deleteParticipantReq);
 
 			if (currentCrew.getRole().equals(snust.sbsp.crew.domain.type.Role.SERVICE_ADMIN))
-				participantRepository.delete(readParticipant(participantReq));
+				participantRepository.delete(readParticipantForDelete(deleteParticipantReq));
 		} else {
-			Role currentParticipantRole = currentParticipant.get().getRole();
-			if (currentParticipantRole.equals(Role.ADMIN) || currentParticipantRole.equals(Role.MANAGER))
-				participantRepository.delete(readParticipant(participantReq));
+			ProjectRole currentParticipantProjectRole = currentParticipant.get().getProjectRole();
+			Company currentProjectCompany = projectService.readProjectById(deleteParticipantReq.getProjectId()).getCompany();
+
+			if (currentCrew.getRole().equals(Role.COMPANY_ADMIN) &&
+				!currentParticipantProjectRole.equals(ProjectRole.MANAGER) &&
+				!currentCrew.getCompany().equals(currentProjectCompany))
+				throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+			if (currentCrew.getRole().equals(Role.COMPANY_ADMIN) || currentParticipantProjectRole.equals(ProjectRole.MANAGER))
+				participantRepository.delete(readParticipantForDelete(deleteParticipantReq));
+
 			else
 				throw new CustomCommonException(ErrorCode.FORBIDDEN);
 		}
@@ -103,48 +121,65 @@ public class ParticipantService {
 
 	private void deleteParticipantByCa(
 		Crew currentCrew,
-		ParticipantReq participantReq
+		DeleteParticipantReq deleteParticipantReq
 	) {
 		Company currentCompany = currentCrew.getCompany();
-		Company targetCompany = crewService.readCrewById(participantReq.getTargetCrewId()).getCompany();
+		Company targetProjectCompany = projectService.readProjectById(deleteParticipantReq.getProjectId()).getCompany();
 
 		if (!currentCrew.getRole().equals(snust.sbsp.crew.domain.type.Role.COMPANY_ADMIN))
 			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-		if (!currentCompany.equals(targetCompany))
-			throw new CustomCommonException(ErrorCode.DIFF_COMPANY);
+		if (!currentCompany.equals(targetProjectCompany))
+			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-		participantRepository.delete(readParticipant(participantReq));
+		participantRepository.delete(readParticipantForDelete(deleteParticipantReq));
 	}
 
-	private Participant readParticipant(ParticipantReq participantReq) {
+	private Participant readParticipantForDelete(DeleteParticipantReq deleteParticipantReq) {
 		return projectService.readParticipantByCrewIdAndProjectId(
-			participantReq.getTargetCrewId(),
-			participantReq.getProjectId()
+			deleteParticipantReq.getTargetCrewId(),
+			deleteParticipantReq.getProjectId()
+		);
+	}
+
+	private Participant readParticipantForUpdate(UpdateParticipantRoleReq updateParticipantRoleReq) {
+		return projectService.readParticipantByCrewIdAndProjectId(
+			updateParticipantRoleReq.getTargetCrewId(),
+			updateParticipantRoleReq.getProjectId()
 		);
 	}
 
 	private void updateRoleByAdmin(
 		Long currentCrewId,
-		ParticipantReq participantReq,
-		Participant participant
+		UpdateParticipantRoleReq updateParticipantRoleReq,
+		Participant targetParticipant
 	) {
-		if (!authService.isAdmin(currentCrewId))
+		Crew currentCrew = crewService.readCrewById(currentCrewId);
+		Company currentCrewCompany = currentCrew.getCompany();
+		Company currentProjectCompany = projectService.readProjectById(updateParticipantRoleReq.getProjectId()).getCompany();
+
+		if (currentCrew.getRole().equals(Role.COMPANY_ADMIN) &&
+			!currentCrewCompany.equals(currentProjectCompany))
 			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-		replaceRole(currentCrewId, participantReq, participant);
+		ProjectRole targetProjectRole = ProjectRole.toEnum(updateParticipantRoleReq.getRole());
+
+		if (!authService.isAdmin(currentCrewId) && !targetProjectRole.equals(ProjectRole.MANAGER))
+			throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+		targetParticipant.update(targetProjectRole);
 	}
 
 	private void replaceRole(
 		Long currentCrewId,
-		ParticipantReq participantReq,
+		UpdateParticipantRoleReq updateParticipantRoleReq,
 		Participant participant
 	) {
-		Role targetRole = Role.from(participantReq.getRole());
+		ProjectRole targetProjectRole = ProjectRole.toEnum(updateParticipantRoleReq.getRole());
 
-		if (!authService.isAdmin(currentCrewId) && targetRole.equals(Role.ADMIN))
+		if (targetProjectRole.equals(ProjectRole.MANAGER))
 			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-		participant.update(targetRole);
+		participant.update(targetProjectRole);
 	}
 }

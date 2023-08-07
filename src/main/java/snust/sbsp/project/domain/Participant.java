@@ -2,7 +2,7 @@ package snust.sbsp.project.domain;
 
 import lombok.*;
 import snust.sbsp.crew.domain.Crew;
-import snust.sbsp.project.domain.type.Role;
+import snust.sbsp.project.domain.type.ProjectRole;
 
 import javax.persistence.*;
 
@@ -17,9 +17,9 @@ public class Participant {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "role")
+	@Column(name = "project_role")
 	@Enumerated(value = EnumType.STRING)
-	private Role role;
+	private ProjectRole projectRole;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "crew_id")
@@ -29,7 +29,7 @@ public class Participant {
 	@JoinColumn(name = "project_id")
 	private Project project;
 
-	public void update(Role role) {
-		this.role = role;
+	public void update(ProjectRole projectRole) {
+		this.projectRole = projectRole;
 	}
 }
