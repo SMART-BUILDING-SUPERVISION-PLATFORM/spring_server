@@ -206,9 +206,11 @@ public class EmailUtil {
 
 		try {
 			message = createAuthMessage(to, code);
+			// 해당 Email로 이미 키쌍이 존재하면 기존 Value삭제
 			if (redisUtil.getData(to) != null)
 				redisUtil.deleteData(to);
 
+			// redis에 <Email, Code> set.
 			redisUtil.setDataExpire(to, code, 3);
 			javaMailSender.send(message);
 		} catch (Exception e) {
@@ -220,17 +222,24 @@ public class EmailUtil {
 		String email = codeValidationReq.getEmail();
 		String code = codeValidationReq.getCode();
 
-		String serverCode = redisUtil.getData(email);
 
-		if (serverCode == null)
+		String redisCode = redisUtil.getData(email);
+
+		// 해딩 Email을 Key로 가지는 Code가 존재하지 않으면 인증실패.
+		if (redisCode == null)
 			throw new CustomCommonException(ErrorCode.EMAIL_CODE_NOT_FOUND);
 
-		if (serverCode.equals(code)) {
+		// Input Code와 redis Code를 비교
+		if (redisCode.equals(code)) {
+
+			// 일치하면 2차 인증코드를 생성, 60분 시간제한.(이메일 인증 후 회원가입 시간 60분으로 제한)
 			String newCode = createCode();
 			redisUtil.setDataExpire(email, newCode, 60);
 
-			return redisUtil.getData(email);
+			// 해당 코드 클라이언트로 전송.
+			return newCode;
 		} else
+			// 일치하지 않으면 인증 실패.
 			throw new CustomCommonException(ErrorCode.EMAIL_CODE_INVALID);
 	}
 }

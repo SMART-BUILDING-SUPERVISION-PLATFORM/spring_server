@@ -17,7 +17,6 @@ import snust.sbsp.crew.dto.res.etc.ValidationCodeDto;
 import snust.sbsp.crew.service.AuthService;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.websocket.server.PathParam;
 
 @RestController
@@ -31,6 +30,7 @@ public class AuthController {
 
 	private final AuthService authService;
 
+	// test complete
 	@GetMapping("/check")
 	public ResponseEntity<CrewDto> checkLoggedIn(
 		@CookieValue(
@@ -39,13 +39,13 @@ public class AuthController {
 		HttpServletRequest request
 	) {
 		sessionUtil.readSession(jSessionId, request);
-		HttpSession session = request.getSession();
-		Crew crew = (Crew) session.getAttribute(jSessionId);
-
+//		HttpSession session = request.getSession();
+//		Crew crew = (Crew) session.getAttribute(jSessionId);
 
 		return Response.ok(HttpStatus.OK);
 	}
 
+	// test complete
 	@PostMapping("/sign-up")
 	public ResponseEntity<?> join(
 		@RequestBody SignUpReq signUpReq
@@ -55,6 +55,7 @@ public class AuthController {
 		return Response.ok(HttpStatus.CREATED);
 	}
 
+	// test complete
 	@PostMapping("/sign-in")
 	public ResponseEntity<?> signIn(
 		@RequestBody SignInReq signInReq,
@@ -66,6 +67,7 @@ public class AuthController {
 		return Response.ok(HttpStatus.OK, null, responseCookie);
 	}
 
+	// test complete
 	@GetMapping("/sign-out")
 	public ResponseEntity<?> signOut(
 		@CookieValue(
@@ -78,6 +80,7 @@ public class AuthController {
 		return Response.ok(HttpStatus.OK);
 	}
 
+	// test complete
 	@GetMapping("/email-duplication")
 	public ResponseEntity<?> validateEmail(
 		@PathParam("email") String email
@@ -88,12 +91,13 @@ public class AuthController {
 		return Response.ok(HttpStatus.OK);
 	}
 
+	// test complete
 	@PostMapping("/validate-code")
 	public ResponseEntity<ValidationCodeDto> validateCode(
 		@RequestBody CodeValidationReq codeValidationReq
 	) {
-		String newCode = emailUtil.isValidateCode(codeValidationReq);
+		String validateCode = emailUtil.isValidateCode(codeValidationReq);
 
-		return Response.ok(HttpStatus.OK, new ValidationCodeDto(newCode));
+		return Response.ok(HttpStatus.OK, new ValidationCodeDto(validateCode));
 	}
 }

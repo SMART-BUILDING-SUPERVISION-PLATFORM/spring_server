@@ -10,51 +10,51 @@ import snust.sbsp.common.exception.CustomCommonException;
 
 public class Response<T> {
 
-  public static <T> ResponseEntity<T> ok(HttpStatus httpStatus) {
+	public static <T> ResponseEntity<T> ok(HttpStatus httpStatus) {
 
-    return new ResponseEntity<>(httpStatus);
-  }
+		return new ResponseEntity<>(httpStatus);
+	}
 
-  public static <T> ResponseEntity<T> ok(
-    HttpStatus httpStatus,
-    T data
-  ) {
+	public static <T> ResponseEntity<T> ok(
+		HttpStatus httpStatus,
+		T data
+	) {
 
-    return ResponseEntity
-      .status(httpStatus)
-      .body(data);
-  }
+		return ResponseEntity
+			.status(httpStatus)
+			.body(data);
+	}
 
-  public static <T> ResponseEntity<T> ok(
-    HttpStatus httpStatus,
-    T data,
-    ResponseCookie responseCookie
-  ) {
+	public static <T> ResponseEntity<T> ok(
+		HttpStatus httpStatus,
+		T data,
+		ResponseCookie responseCookie
+	) {
 
-    return ResponseEntity
-      .status(httpStatus)
-      .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-      .body(data);
-  }
-  
-  public static ResponseEntity<ErrorResponse> fail(CustomCommonException e) {
+		return ResponseEntity
+			.status(httpStatus)
+			.header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+			.body(data);
+	}
 
-    return ResponseEntity
-      .status(e.getHttpStatus())
-      .body(new ErrorResponse(e));
-  }
+	public static ResponseEntity<ErrorResponse> fail(CustomCommonException e) {
 
-  @Getter
-  @AllArgsConstructor
-  static class ErrorResponse {
+		return ResponseEntity
+			.status(e.getHttpStatus())
+			.body(new ErrorResponse(e));
+	}
 
-    private final int code;
+	@Getter
+	@AllArgsConstructor
+	static class ErrorResponse {
 
-    private final String message;
+		private final int code;
 
-    ErrorResponse(CustomCommonException e) {
-      this.code = e.getCode();
-      this.message = e.getMessage();
-    }
-  }
+		private final String message;
+
+		ErrorResponse(CustomCommonException e) {
+			this.code = e.getCode();
+			this.message = e.getMessage();
+		}
+	}
 }

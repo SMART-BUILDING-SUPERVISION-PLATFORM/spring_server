@@ -16,37 +16,41 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CompanyService {
 
-    private final CompanyRepository companyRepository;
+	private final CompanyRepository companyRepository;
 
-    @Transactional(readOnly = true)
-    public List<CompanyRes> readCompany(String companyName) {
-        List<Company> companyList = companyRepository.findAll();
+	@Transactional(readOnly = true)
+	public List<CompanyRes> readCompany(String companyName) {
+		// DB에 저장된 모든 회사 조회
+		List<Company> companyList = companyRepository.findAll();
 
-        if (companyName != null) {
-            companyList =
-                    companyList
-                            .stream()
-                            .filter(company ->
-                                    company
-                                            .getName()
-                                            .toLowerCase()
-                                            .contains(companyName.toLowerCase())
-                            ).collect(Collectors.toList());
-        }
+		// companyName == null이면 모든 회사 조회
+		if (companyName != null) {
+			companyList =
+				companyList
+					.stream()
+					.filter(company ->
+						company
+							.getName()
+							.toLowerCase()
+							.contains(companyName.toLowerCase())
+					).collect(Collectors.toList());
+		}
 
-        return companyList
-                .stream()
-                .map(company ->
-                        CompanyRes
-                                .builder()
-                                .company(company)
-                                .build()
-                ).collect(Collectors.toList());
-    }
+		// companyName != null이면 하나의 회사만 조회.
+		return companyList
+			.stream()
+			.map(company ->
+				CompanyRes
+					.builder()
+					.company(company)
+					.build()
+			).collect(Collectors.toList());
+	}
 
-    @Transactional(readOnly = true)
-    public Company findById(Long companyId) {
-        return companyRepository.findById(companyId)
-                .orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
-    }
+	@Transactional(readOnly = true)
+	public Company findById(Long companyId) {
+		// CompanyID로 회사 조회.
+		return companyRepository.findById(companyId)
+			.orElseThrow(() -> new CustomCommonException(ErrorCode.COMPANY_NOT_FOUND));
+	}
 }

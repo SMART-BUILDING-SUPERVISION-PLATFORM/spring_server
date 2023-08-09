@@ -18,14 +18,15 @@ import java.util.List;
 @RequestMapping("/api/company")
 public class CompanyController {
 
-  private final CompanyService companyService;
+	private final CompanyService companyService;
 
-  @GetMapping
-  public ResponseEntity<List<CompanyRes>> getCompanyList(
-    @RequestParam(required = false, value = "name") String name
-  ) {
-    List<CompanyRes> companyList = companyService.readCompany(name);
+	// test complete
+	@GetMapping
+	public ResponseEntity<List<CompanyRes>> getCompanyList(
+		@RequestParam(required = false, value = "name") String name
+	) {
+		List<CompanyRes> companyList = companyService.readCompany(name);
 
-    return Response.ok(HttpStatus.OK, companyList);
-  }
+		return Response.ok(HttpStatus.OK, companyList);
+	}
 }

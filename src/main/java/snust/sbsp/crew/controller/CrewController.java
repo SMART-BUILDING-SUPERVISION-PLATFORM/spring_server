@@ -19,6 +19,7 @@ public class CrewController {
 
 	private final CrewService crewService;
 
+	// test complete
 	@GetMapping
 	public ResponseEntity<CrewRes> getInformation(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId
@@ -28,15 +29,17 @@ public class CrewController {
 		return Response.ok(HttpStatus.OK, crew);
 	}
 
+	// test complete
 	@GetMapping("/{id}")
 	public ResponseEntity<CrewRes> getCrew(
-		@PathVariable("id") Long id
+		@PathVariable("id") Long crewId
 	) {
-		CrewRes crew = crewService.readCrewInformation(id);
+		CrewRes crew = crewService.readCrewInformation(crewId);
 
 		return Response.ok(HttpStatus.OK, crew);
 	}
 
+	// test complete
 	@GetMapping("/admin-all")
 	public ResponseEntity<List<CrewRes>> getAllCrewList(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -50,6 +53,7 @@ public class CrewController {
 		return Response.ok(HttpStatus.OK, crewList);
 	}
 
+	// test complete
 	@GetMapping("/admin-ca")
 	public ResponseEntity<List<CrewRes>> getCompanyCrewList(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -62,6 +66,7 @@ public class CrewController {
 		return Response.ok(HttpStatus.OK, crewList);
 	}
 
+	// test complete
 	@PutMapping("/admin-ca/{id}")
 	public ResponseEntity<?> togglePendingByCa(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -72,6 +77,7 @@ public class CrewController {
 		return Response.ok(HttpStatus.OK);
 	}
 
+	// test complete
 	@PutMapping("/admin-sa/{id}")
 	public ResponseEntity<?> togglePendingBySa(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -82,22 +88,24 @@ public class CrewController {
 		return Response.ok(HttpStatus.OK);
 	}
 
+	// test complete
 	@DeleteMapping("/admin-ca/{id}")
-	public ResponseEntity<?> deleteCompanyCrew(
+	public ResponseEntity<?> deleteByCa(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-		@PathVariable("id") Long id
+		@PathVariable("id") Long crewId
 	) {
-		crewService.deleteCompanyCrew(currentCrewId, id);
+		crewService.deleteByCa(currentCrewId, crewId);
 
 		return Response.ok(HttpStatus.OK);
 	}
 
+	// test complete
 	@DeleteMapping("/admin-sa/{id}")
-	public ResponseEntity<?> deleteCrew(
+	public ResponseEntity<?> deleteBySa(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-		@PathVariable("id") Long id
+		@PathVariable("id") Long crewId
 	) {
-		crewService.deleteCrew(currentCrewId, id);
+		crewService.deleteBySa(currentCrewId, crewId);
 
 		return Response.ok(HttpStatus.OK);
 	}
