@@ -14,4 +14,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
 			.excludePathPatterns("/api/crew/auth/*")
 			.excludePathPatterns("/api/company");
 	}
+
+//	@Bean
+//	public FilterRegistrationBean<CustomCorsFilter> customCorsFilter() {
+//		FilterRegistrationBean<CustomCorsFilter> registrationBean
+//			= new FilterRegistrationBean<>();
+//
+//		registrationBean.setFilter(new CustomCorsFilter());
+//		registrationBean.setOrder(1);
+//		registrationBean.setName("First-CustomCorsFilter");
+//
+//		return registrationBean;
+//	}
 }

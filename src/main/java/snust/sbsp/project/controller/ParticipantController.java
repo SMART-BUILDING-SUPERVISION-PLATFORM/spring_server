@@ -17,16 +17,18 @@ public class ParticipantController {
 
 	private final ParticipantService participantService;
 
-	@PostMapping
+	// test complete
+	@PostMapping("/{id}")
 	public ResponseEntity<?> join(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
-		@RequestBody UpdateParticipantRoleReq updateParticipantRoleReq
+		@PathVariable("id") Long projectId
 	) {
-		participantService.requestToJoin(currentCrewId, updateParticipantRoleReq);
+		participantService.requestToJoin(currentCrewId, projectId);
 
 		return Response.ok(HttpStatus.CREATED);
 	}
 
+	// test complete
 	@PutMapping
 	public ResponseEntity<?> update(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -37,6 +39,7 @@ public class ParticipantController {
 		return Response.ok(HttpStatus.OK);
 	}
 
+	// test complete
 	@DeleteMapping
 	public ResponseEntity<?> delete(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,

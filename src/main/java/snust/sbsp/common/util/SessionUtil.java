@@ -23,8 +23,10 @@ public class SessionUtil {
 		Crew crew,
 		HttpServletRequest request
 	) {
+		// JSESSIONID 생성, Session Storage에 <JSESSIONID, CREW> 저장.
 		String jSessionId = createSession(crew, request);
 
+		// COOKIE 생성, 3시간짜리, 클라이언트 전송용.
 		return ResponseCookie.from("JSESSIONID", jSessionId)
 			.httpOnly(true)
 			.secure(true)
@@ -52,16 +54,16 @@ public class SessionUtil {
 		HttpServletRequest request
 	) {
 		HttpSession session = request.getSession();
-		if (session.getAttribute(jSessionId) != null) {
+		
+		if (session.getAttribute(jSessionId) != null)
 			throw new CustomCommonException(ErrorCode.FORBIDDEN);
-		}
-
 	}
 
 	public void removeSession(
 		String jSessionId,
 		HttpServletRequest request
 	) {
+		// SESSION STORAGE에서 해당 CREW삭제.
 		HttpSession session = request.getSession();
 		session.removeAttribute(jSessionId);
 	}

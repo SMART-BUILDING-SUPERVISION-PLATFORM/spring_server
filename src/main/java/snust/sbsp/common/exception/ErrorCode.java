@@ -21,6 +21,9 @@ public enum ErrorCode {
 	PENDING_STATE(-411, HttpStatus.FORBIDDEN, "you are in pending state."),
 	FORBIDDEN(-412, HttpStatus.FORBIDDEN, "you don't have right to access."),
 	REPLIER_ALREADY_EXIST(-413, HttpStatus.FORBIDDEN, "someone already replied to this note."),
+	POINT_ITSELF(-414, HttpStatus.FORBIDDEN, "you don't modify your own information."),
+	CANNOT_ACCESS_ADMIN(-415, HttpStatus.FORBIDDEN, "you don't access or modify admin's information."),
+	CANNOT_ACCESS_SERVICE_ADMIN(-416, HttpStatus.FORBIDDEN, "you don't access or modify service admin's information."),
 
 	// 404 NON_FOUND 존재하지 않음 [-421, -430]
 	COMPANY_NOT_FOUND(-421, HttpStatus.NOT_FOUND, "company not found."),

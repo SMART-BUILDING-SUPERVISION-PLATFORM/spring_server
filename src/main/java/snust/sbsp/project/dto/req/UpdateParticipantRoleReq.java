@@ -13,5 +13,5 @@ public class UpdateParticipantRoleReq {
 
 	private Long targetCrewId;
 
-	private String role;
+	private String targetProjectRole;
 }
