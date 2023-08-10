@@ -466,14 +466,14 @@ public class ProjectService {
 		List<String> srcList = panoramaReq.getPanoramaSrcList();
 
 		// Panorama DB에서 해당 프로젝트에 등록된 파노라마가 이미 등록되어 있는지 확인.
-		Optional<Panorama> panorama = panoramaRepository
+		panoramaRepository
 			.findByProjectId(projectId)
 			.stream()
-			.findAny();
-
-		// 이미 등록되어 있다면 모두 삭제.
-		if (panorama.isPresent())
-			panoramaRepository.deleteAllByProjectId(projectId);
+			.findAny()
+			.ifPresent(panorama -> {
+				// 이미 등록되어 있다면 모두 삭제.
+				panoramaRepository.deleteAllByProjectId(projectId);
+			});
 
 		// Request Body에서 추출한 srcList -> Panorama Entity로 변형.
 		List<Panorama> panoramaList = srcList

@@ -17,8 +17,6 @@ import snust.sbsp.project.dto.req.DeleteParticipantReq;
 import snust.sbsp.project.dto.req.UpdateParticipantRoleReq;
 import snust.sbsp.project.repository.ParticipantRepository;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class ParticipantService {
@@ -62,10 +60,11 @@ public class ParticipantService {
 			initProjectRole = ProjectRole.ADMIN;
 
 		// 해당 프로젝트에 이미 참여자로 등록이 되어있는지 확인.
-		Optional<Participant> participant = participantRepository.findByCrewIdAndProjectId(currentCrewId, projectId);
-		// 이미 등록되어 있을 경우 throw ALREADY_REGISTERD.
-		if (participant.isPresent())
-			throw new CustomCommonException(ErrorCode.ALREADY_REGISTERED);
+		participantRepository.findByCrewIdAndProjectId(currentCrewId, projectId)
+			// 이미 등록되어 있을 경우 throw ALREADY_REGISTERD.
+			.ifPresent(participant -> {
+				throw new CustomCommonException(ErrorCode.ALREADY_REGISTERED);
+			});
 
 		// Participant Entity로 변환.
 		Participant newParticipant = Participant.builder()
@@ -83,44 +82,49 @@ public class ParticipantService {
 		Long currentCrewId,
 		UpdateParticipantRoleReq updateParticipantRoleReq
 	) {
+		Crew currentCrew = crewService.readCrewById(currentCrewId);
 		// 현재 ProjectID 추출.
-		Long projectId = updateParticipantRoleReq.getProjectId();
+		Long currentProjectId = updateParticipantRoleReq.getProjectId();
 		// 권한변경을 적용할 대상 CrewID 추출.
 		Long targetCrewId = updateParticipantRoleReq.getTargetCrewId();
 
-
-		// 해당 프로젝트에 현재 회원이 참여중인지 검사.
-		Optional<Participant> currentParticipant = participantRepository
-			.findByCrewIdAndProjectId(currentCrewId, projectId);
-
 		// 권한변경 대상 회원이 해당 프로젝트의 참여자인지 검사.
 		Participant tartgetParticipant = projectService
-			.readParticipantByCrewIdAndProjectId(targetCrewId, projectId);
+			.readParticipantByCrewIdAndProjectId(targetCrewId, currentProjectId);
 
-		// 현재 회원이 해당 프로젝트의 참여자일 경우
-		currentParticipant.ifPresent(
-			participant -> {
-				// 현재 참여자의 현재 프로젝트 내에서의 권한 조회.
-				ProjectRole projectRoleOfParticipant = participant.getProjectRole();
+		// 해당 프로젝트에 현재 회원이 참여중인지 검사.
+		participantRepository
+			.findByCrewIdAndProjectId(currentCrewId, currentProjectId)
+			.ifPresentOrElse(participant -> {
+					// 현재 참여자의 현재 프로젝트 내에서의 권한 조회.
+					ProjectRole projectRoleOfParticipant = participant.getProjectRole();
 
-				// 현재 참여자의 프로젝트 권한이 ADMIN도 아니고 MANAGER도 아닐 떄 throw FORBIDDEN.
-				if (!projectRoleOfParticipant.equals(ProjectRole.ADMIN) &&
-					!projectRoleOfParticipant.equals(ProjectRole.MANAGER)) {
-					throw new CustomCommonException(ErrorCode.FORBIDDEN);
-				} else {
+					// 현재 참여자의 프로젝트 권한이 ADMIN도 아니고 MANAGER도 아닐 떄 throw FORBIDDEN.
+					if (!projectRoleOfParticipant.equals(ProjectRole.ADMIN) &&
+						!projectRoleOfParticipant.equals(ProjectRole.MANAGER))
+						throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+					else {
+						// 자기 자신의 권한을 변경하려 할 떄 thorw POINT_ITSELF
+						if (currentCrewId.equals(targetCrewId))
+							throw new CustomCommonException(ErrorCode.POINT_ITSELF);
+
+						// 삭제대상 프로젝트 권한이 ADMIN인지 여부
+						isProjectRoleAdmin(currentCrew, targetCrewId, updateParticipantRoleReq.getProjectId());
+
+						// 현재 참여자의 프로젝트 권한이 ADMIN또는 MANAGER일 때
+						replaceRole(participant, tartgetParticipant, updateParticipantRoleReq);
+					}
+				}, () -> {
+					// 현재 회원이 해당 프로젝트의 참여자가 아닐 경우 (관리자로 접근.)
 					if (currentCrewId.equals(targetCrewId))
 						throw new CustomCommonException(ErrorCode.POINT_ITSELF);
-					// 현재 참여자의 프로젝트 권한이 ADMIN또는 MANAGER일 때
-					replaceRole(participant, tartgetParticipant, updateParticipantRoleReq);
-				}
-			});
 
-		// 현재 회원이 해당 프로젝트의 참여자가 아닐 경우 (관리자로 접근.)
-		if (currentParticipant.isEmpty()) {
-			if (currentCrewId.equals(targetCrewId))
-				throw new CustomCommonException(ErrorCode.POINT_ITSELF);
-			updateRoleByAdmin(currentCrewId, updateParticipantRoleReq, tartgetParticipant);
-		}
+					// 삭제대상 프로젝트 권한이 ADMIN인지 여부
+					isProjectRoleAdmin(currentCrew, targetCrewId, updateParticipantRoleReq.getProjectId());
+					updateRoleByAdmin(currentCrewId, updateParticipantRoleReq, tartgetParticipant);
+				}
+			);
 	}
 
 	@Transactional
@@ -132,49 +136,56 @@ public class ParticipantService {
 		Crew currentCrew = crewService.readCrewById(currentCrewId);
 		// 현재 회원 서비스 권한 조회
 		Role roleOfCurrentCrew = currentCrew.getRole();
-
 		// 삭제 대상 CrewId
 		Long targetCerwId = deleteParticipantReq.getTargetCrewId();
 
 		// 현재 회원이 해당 프로젝트애 참여중인지 검증.
-		Optional<Participant> currentParticipant = participantRepository.findByCrewIdAndProjectId(currentCrewId, deleteParticipantReq.getProjectId());
+		participantRepository
+			.findByCrewIdAndProjectId(currentCrewId, deleteParticipantReq.getProjectId())
+			.ifPresentOrElse(
+				participant -> {
+					// 해당 프로젝트에 참여하고 있을 경우
+					// 해당 참여자의 프로젝트 권한 추출.
+					ProjectRole projectRoleOfCurrentParticipant = participant.getProjectRole();
 
-		// 해당 프로젝트에 참여하고 있을 경우
-		currentParticipant.ifPresent(
-			participant -> {
-				// 해당 참여자의 프로젝트 권한 추출.
-				ProjectRole projectRoleOfCurrentParticipant = participant.getProjectRole();
+					// 프로젝트 권한이 ADMIN도 아니고 MANAGER도 아닌 경우. throw FORBIDDEN.
+					if (!projectRoleOfCurrentParticipant.equals(ProjectRole.ADMIN)
+						&& !projectRoleOfCurrentParticipant.equals(ProjectRole.MANAGER))
+						throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-				// 프로젝트 권한이 ADMIN도 아니고 MANAGER도 아닌 경우. throw FORBIDDEN.
-				if (!projectRoleOfCurrentParticipant.equals(ProjectRole.ADMIN)
-					&& !projectRoleOfCurrentParticipant.equals(ProjectRole.MANAGER))
-					throw new CustomCommonException(ErrorCode.FORBIDDEN);
+					if (currentCrewId.equals(targetCerwId))
+						throw new CustomCommonException(ErrorCode.POINT_ITSELF);
 
-				if (currentCrewId.equals(targetCerwId))
-					throw new CustomCommonException(ErrorCode.POINT_ITSELF);
-			}
-		);
+					// 삭제대상 프로젝트 권한이 ADMIN인지 여부
+					isProjectRoleAdmin(currentCrew, deleteParticipantReq.getTargetCrewId(), deleteParticipantReq.getProjectId());
+				},
+				// 해당 프로젝트에 참여하고 있지 않을 경우.
+				() -> {
+					// 현재 회원의 서비스 권한이 COMPANY_ADMIN일 경우
+					if (roleOfCurrentCrew.equals(snust.sbsp.crew.domain.type.Role.COMPANY_ADMIN))
+						deleteParticipantByCa(currentCrew, deleteParticipantReq);
 
-		// 해당 프로젝트에 참여하고 있지 않을 경우.
-		if (currentParticipant.isEmpty()) {
-			// 현재 회원의 서비스 권한이 COMPANY_ADMIN일 경우
-			if (roleOfCurrentCrew.equals(snust.sbsp.crew.domain.type.Role.COMPANY_ADMIN))
-				deleteParticipantByCa(currentCrew, deleteParticipantReq);
+					// 현재 회원의 서비스 권한이 SERVICE_ADMIN일 경우
+					if (roleOfCurrentCrew.equals(snust.sbsp.crew.domain.type.Role.SERVICE_ADMIN))
+						if (currentCrewId.equals(targetCerwId))
+							throw new CustomCommonException(ErrorCode.POINT_ITSELF);
 
-			// 현재 회원의 서비스 권한이 SERVICE_ADMIN일 경우
-			if (roleOfCurrentCrew.equals(snust.sbsp.crew.domain.type.Role.SERVICE_ADMIN)) {
-				if (currentCrewId.equals(targetCerwId))
-					throw new CustomCommonException(ErrorCode.POINT_ITSELF);
-				participantRepository.delete(readParticipantForDelete(deleteParticipantReq));
-			}
-		}
+					// 삭제대상 프로젝트 권한이 ADMIN인지 여부
+					isProjectRoleAdmin(currentCrew, deleteParticipantReq.getTargetCrewId(), deleteParticipantReq.getProjectId());
+				}
+			);
+
+		// 삭제할 참여자 객체 추출, 삭제
+		Participant participantForDelete = readParticipantForDelete(deleteParticipantReq);
+		participantRepository.delete(participantForDelete);
 	}
 
 	private Participant readParticipantForDelete(DeleteParticipantReq deleteParticipantReq) {
-		return projectService.readParticipantByCrewIdAndProjectId(
-			deleteParticipantReq.getTargetCrewId(),
-			deleteParticipantReq.getProjectId()
-		);
+		Long targetCrewId = deleteParticipantReq.getTargetCrewId();
+		Long currentProjectId = deleteParticipantReq.getProjectId();
+
+		return projectService
+			.readParticipantByCrewIdAndProjectId(targetCrewId, currentProjectId);
 	}
 
 	private void updateRoleByAdmin(
@@ -254,5 +265,25 @@ public class ParticipantService {
 
 		// 참여자 권한 변경.
 		targetParticipant.update(targetProjectRole);
+	}
+
+	@Transactional(readOnly = true)
+	public void isProjectRoleAdmin(
+		Crew actionCrew,
+		Long targetCrewId,
+		Long projectId
+	) {
+		Participant targetParticipant = participantRepository
+			.findByCrewIdAndProjectId(targetCrewId, projectId)
+			.orElseThrow(() -> new CustomCommonException(ErrorCode.PARTICIPANT_NOT_FOUND));
+
+		Role roleOfActionCrew = actionCrew.getRole();
+		Role roleOfTargetCrew = targetParticipant.getCrew().getRole();
+
+		if (!roleOfActionCrew.equals(Role.SERVICE_ADMIN)) {
+			if (roleOfTargetCrew.equals(Role.SERVICE_ADMIN) ||
+				roleOfTargetCrew.equals(Role.COMPANY_ADMIN))
+				throw new CustomCommonException(ErrorCode.CANNOT_ACCESS_SERVICE_ADMIN);
+		}
 	}
 }

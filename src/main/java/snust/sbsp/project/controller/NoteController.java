@@ -20,7 +20,7 @@ public class NoteController {
 
 	private final NoteService noteService;
 
-	// test
+	// test complete
 	@PostMapping
 	public ResponseEntity<?> addNewNote(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -31,7 +31,7 @@ public class NoteController {
 		return Response.ok(HttpStatus.CREATED);
 	}
 
-	// test
+	// test complete
 	@PutMapping
 	public ResponseEntity<?> updateNote(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -42,7 +42,7 @@ public class NoteController {
 		return Response.ok(HttpStatus.OK);
 	}
 
-	// test
+	// test complete
 	@GetMapping("/user/{id}")
 	public ResponseEntity<List<NoteDto>> getNoteList(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -56,7 +56,7 @@ public class NoteController {
 		return Response.ok(HttpStatus.OK, noteList);
 	}
 
-	// test
+	// test complete
 	@GetMapping("/admin/{id}")
 	public ResponseEntity<List<NoteDto>> getNoteListForSa(
 		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
