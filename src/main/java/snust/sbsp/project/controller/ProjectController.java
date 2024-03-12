@@ -4,12 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import snust.sbsp.common.exception.CustomCommonException;
-import snust.sbsp.common.exception.ErrorCode;
 import snust.sbsp.common.interceptor.Interceptor;
 import snust.sbsp.common.res.Response;
-import snust.sbsp.crew.domain.Crew;
-import snust.sbsp.crew.domain.type.Role;
 import snust.sbsp.crew.service.CrewService;
 import snust.sbsp.project.domain.Project;
 import snust.sbsp.project.dto.req.PanoramaReq;
@@ -118,14 +114,14 @@ public class ProjectController {
 	// test complete (not for this service. only for service admin.)
 	@GetMapping("/python/panorama/{id}")
 	public ResponseEntity<List<PanoramaDtoForPythonProject>> getPanoramas(
-		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+//		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
 		@PathVariable("id") Long projectId
 	) {
-		Crew currentCrew = crewService.readCrewById(currentCrewId);
+//		Crew currentCrew = crewService.readCrewById(currentCrewId);
+//		if (!currentCrew.getRole().equals(Role.SERVICE_ADMIN))
+//			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-		if (!currentCrew.getRole().equals(Role.SERVICE_ADMIN))
-			throw new CustomCommonException(ErrorCode.FORBIDDEN);
-
+		System.out.println(projectId);
 		Project project = projectService.readProjectById(projectId);
 
 		List<PanoramaDtoForPythonProject> panoramaList = project.getPanoramaList()
