@@ -111,7 +111,7 @@ public class ProjectController {
 		return Response.ok(HttpStatus.OK);
 	}
 
-	// test complete (not for this service. only for service admin.)
+	// test complete (CHeck if there is any pano image for creation )
 	@GetMapping("/python/panorama/{id}")
 	public ResponseEntity<List<PanoramaDtoForPythonProject>> getPanoramas(
 //		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
@@ -121,7 +121,6 @@ public class ProjectController {
 //		if (!currentCrew.getRole().equals(Role.SERVICE_ADMIN))
 //			throw new CustomCommonException(ErrorCode.FORBIDDEN);
 
-		System.out.println(projectId);
 		Project project = projectService.readProjectById(projectId);
 
 		List<PanoramaDtoForPythonProject> panoramaList = project.getPanoramaList()
@@ -130,5 +129,16 @@ public class ProjectController {
 			.collect(Collectors.toList());
 
 		return Response.ok(HttpStatus.OK, panoramaList);
+	}
+
+	//	Test complete
+	@GetMapping("/{id}/check-for-recording")
+	public ResponseEntity<?> checkIsAllowedToRecord(
+		@RequestAttribute(Interceptor.CURRENT_CREW_ID) Long currentCrewId,
+		@PathVariable("id") Long projectId
+	) {
+		projectService.checkIsAllowedToRecord(currentCrewId, projectId);
+
+		return Response.ok(HttpStatus.OK);
 	}
 }

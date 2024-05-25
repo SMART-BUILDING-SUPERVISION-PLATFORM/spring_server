@@ -404,6 +404,47 @@ public class ProjectService {
 	}
 
 	@Transactional(readOnly = true)
+	public void checkIsAllowedToRecord(Long crewId, Long projectId) {
+		try {
+//			Try: 현재 프로젝트에 참여하는 현재 회원에 한해서 검사.
+			ProjectRole roleOfCurrentCrewInThisProject = readParticipantByCrewIdAndProjectId(crewId, projectId)
+				.getProjectRole();
+
+//			프로젝트 권한이 ADMIN, MANAGER, EDITOR중 하나라도 아닌 경우 Catch로 이동
+			if ((!roleOfCurrentCrewInThisProject.equals(ProjectRole.ADMIN))
+				&& (!roleOfCurrentCrewInThisProject.equals(ProjectRole.MANAGER))
+				&& (!roleOfCurrentCrewInThisProject.equals(ProjectRole.EDITABLE)))
+				throw new CustomCommonException(ErrorCode.FORBIDDEN);
+
+		} catch (CustomCommonException e) {
+			System.out.println("he's not allowed to edit");
+//			현재 회원정보 조회.
+			Crew currentCrew = crewService.readCrewById(crewId);
+			System.out.println(currentCrew.getEmail());
+//			SERVICE_ADMIN이 아닌경우
+			if (!currentCrew.getRole().equals(Role.SERVICE_ADMIN)) {
+				System.out.println("he's not a service_admin");
+//				현재 프로젝트의 회사와 현재 회원의 회사가 일치하는지 조회
+				Long companyIdOfCurrentProject = readProjectById(projectId)
+					.getCompany()
+					.getId();
+				Long companyIdOfCurrentCrew = currentCrew
+					.getCompany()
+					.getId();
+//				COMPANY_ADMIN가 아닌 경우
+				if (!currentCrew.getRole().equals(Role.COMPANY_ADMIN)) {
+					throw new CustomCommonException(ErrorCode.FORBIDDEN);
+				} else {
+//				COMPANY_ADMIN인 경우 프로젝트와 회사의 ID가 동일한지 조회
+					if (!companyIdOfCurrentProject.equals(companyIdOfCurrentCrew)) {
+						throw new CustomCommonException(ErrorCode.FORBIDDEN);
+					}
+				}
+			}
+		}
+	}
+
+	@Transactional(readOnly = true)
 	public Participant readParticipantByCrewIdAndProjectId(
 		Long currentCrewId,
 		Long projectId
